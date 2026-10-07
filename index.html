@@ -2,63 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Google Photos — Better Photo Retrieval MVP</title>
-  <meta name="description" content="Interactive prototype that improves photo retrieval in Google Photos: search awareness on every open, a recall-based search prompt (who, what, when, where), and search inside a person's photos.">
-  <meta name="theme-color" content="#000000">
-  <meta property="og:title" content="Google Photos — Better Photo Retrieval MVP">
-  <meta property="og:description" content="Recall-based search prototype grounded in user research (5 interviews, 56 survey responses).">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=0">
+  <title>Google Photos MVP</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 4A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%234285F4' d='M44 24A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%2334A853' d='M24 44A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%23FBBC04' d='M4 24A10 10 0 0 0 24 24Z'/%3E%3C/svg%3E">
 </head>
 <body>
-
-
-
-  <!-- Phone -->
-  <main class="phone">
-    <div class="viewport" id="viewport">
-      <div class="statusbar" aria-hidden="true">
-        <span id="clock">5:11</span>
-        <span class="icons"><span class="ms">notifications_off</span><span class="ms">wifi</span><span class="ms">signal_cellular_alt</span><span class="battery">74</span></span>
-      </div>
-
-      <section class="screen" id="s-photos" aria-label="Photos"></section>
-      <section class="screen" id="s-search" aria-label="Search"></section>
-      <section class="screen" id="s-results" aria-label="Search results"></section>
-      <section class="screen" id="s-collections" aria-label="Collections"></section>
-      <section class="screen" id="s-people" aria-label="People"></section>
-      <section class="screen" id="s-person" aria-label="Person"></section>
-
-      <nav class="navbar" id="navbar" aria-label="Main">
-        <div class="nav-pill">
-          <button class="nav-item" id="nav-photos" data-action="go" data-href="#/photos"><span class="ms">photo</span>Photos</button>
-          <button class="nav-item" id="nav-collections" data-action="go" data-href="#/collections"><span class="ms">bar_chart</span>Collections</button>
-          <button class="nav-item" id="nav-create" data-action="toast" data-msg="Create isn't part of this prototype">Create</button>
-        </div>
-        <div class="fab-wrap">
-          <button class="fab" id="fab" data-action="go" data-href="#/search" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-              <circle cx="10" cy="12" r="6"/><path d="M14.5 16.5 20 22"/>
-              <path d="M18.5 1.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="fab-label">Search</span>
-          </button>
-        </div>
-      </nav>
-
-      <div class="viewer hide" id="viewer" role="dialog" aria-label="Photo viewer"></div>
-      <div class="toast" id="toast" role="status"></div>
+  <main class="device">
+    <div class="screen" id="app-root">
+       <!-- App UI injected here -->
     </div>
+    
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-photos" onclick="navigate('#/photos')">
+        <div class="icon-box"><span class="ms">photo</span></div>
+        <span>Photos</span>
+      </button>
+      <button class="nav-item" id="nav-memories" onclick="alert('Not in MVP')">
+        <div class="icon-box"><span class="ms">history</span></div>
+        <span>Memories</span>
+      </button>
+      <button class="nav-item" id="nav-collections" onclick="navigate('#/collections')">
+        <div class="icon-box"><span class="ms">photo_library</span></div>
+        <span>Library</span>
+      </button>
+      <button class="nav-item" id="nav-search" onclick="navigate('#/search')">
+        <div class="icon-box"><span class="ms">search</span></div>
+        <span>Search</span>
+      </button>
+    </nav>
+    
+    <div id="viewer-root"></div>
   </main>
-
-
-
+  
   <script src="data.js"></script>
   <script src="search.js"></script>
   <script src="app.js"></script>

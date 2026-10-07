@@ -1,15 +1,14 @@
 /* =========================================================
-   Application UI Logic for Google Photos MVP
+   Application UI Logic for Realistic Google Photos MVP
    ========================================================= */
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
-// Global State
 let state = {
   route: '',
   searchQuery: '',
-  searchPersonContext: null, // If searching inside a specific person's photos
+  searchPersonContext: null,
   opens: 0
 };
 
@@ -30,102 +29,120 @@ window.addEventListener('hashchange', () => {
     state.searchPersonContext = null;
   }
 
+  if (state.route === 'photos') state.opens++;
+
   renderRoute();
 });
 
 function renderRoute() {
-  // Hide all screens
-  $$('.screen').forEach(s => s.classList.remove('active'));
   $$('.nav-item').forEach(btn => btn.classList.remove('active'));
 
-  // Show active screen
-  const s = $(`#s-${state.route}`);
-  if (s) s.classList.add('active');
-
-  // Activate nav button
-  const n = $(`#nav-${state.route}`);
+  let activeNav = state.route;
+  if (state.route === 'people' || state.route === 'person') activeNav = 'collections';
+  
+  const n = $(`#nav-${activeNav}`);
   if (n) n.classList.add('active');
 
-  // Handle specific routes
-  if (state.route === 'photos') renderPhotos();
-  else if (state.route === 'search') renderSearch();
-  else if (state.route === 'collections') renderCollections();
-  else if (state.route === 'people') renderPeople();
-  else if (state.route === 'person') renderPerson();
+  const root = $('#app-root');
 
-  // Highlight step in left pane
-  $$('.step').forEach(btn => btn.classList.remove('active'));
-  const stepBtn = $(`.step[data-href="${window.location.hash}"]`) || 
-                  (state.route === 'person' ? $(`.step[data-href="#/person/ananya"]`) : null);
-  if (stepBtn) stepBtn.classList.add('active');
+  if (state.route === 'photos') root.innerHTML = renderPhotos();
+  else if (state.route === 'search') root.innerHTML = renderSearch();
+  else if (state.route === 'collections') root.innerHTML = renderCollections();
+  else if (state.route === 'people') root.innerHTML = renderPeople();
+  else if (state.route === 'person') root.innerHTML = renderPerson();
+
+  if (state.route === 'search') attachSearchEvents();
 }
 
 // --- Screens ---
 
 function renderPhotos() {
-  const s = $('#s-photos');
-  s.innerHTML = `
+  // Sort photos by date
+  const sortedPhotos = [...PHOTOS].sort((a,b) => b.date.localeCompare(a.date));
+  
+  // Group by date
+  const groups = {};
+  sortedPhotos.forEach(p => {
+    if(!groups[p.date]) groups[p.date] = [];
+    groups[p.date].push(p);
+  });
+
+  return `
     <div class="top-bar">
-      <div class="logo">Google Photos <span>MVP</span></div>
-      <div class="avatar"><img src="assets/photos/aarav.jpg" alt="Me"></div>
-    </div>
-    
-    <div class="home-search-nudge" data-action="go" data-href="#/search">
-      <span class="ms pulse-icon">search</span>
-      <div class="nudge-text">
-        <b>Search your photos</b>
-        <span class="nudge-tip">${OPEN_TIPS[state.opens % OPEN_TIPS.length].body}</span>
+      <div class="logo-area">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 4A10 10 0 0 0 24 24Z"/><path fill="#4285F4" d="M44 24A10 10 0 0 0 24 24Z"/><path fill="#34A853" d="M24 44A10 10 0 0 0 24 24Z"/><path fill="#FBBC04" d="M4 24A10 10 0 0 0 24 24Z"/></svg>
+        Google Photos
+      </div>
+      <div class="top-actions">
+        <img src="assets/photos/aarav.jpg" class="avatar" alt="Me" onclick="navigate('#/photos')">
       </div>
     </div>
     
-    <div class="memories">
-      <div class="memory"><img src="assets/photos/wedding_bride.jpg"><div class="m-title">1 year ago</div></div>
-      <div class="memory"><img src="assets/photos/trek.jpg"><div class="m-title">Manali memories</div></div>
-      <div class="memory"><img src="assets/photos/goa_beach.jpg"><div class="m-title">Recent highlights</div></div>
+    <div class="search-nudge" onclick="navigate('#/search')">
+      <span class="ms">search</span>
+      <div class="search-nudge-text">
+        <strong>Search for a memory...</strong>
+        ${OPEN_TIPS[state.opens % OPEN_TIPS.length].body}
+      </div>
+    </div>
+    
+    <div class="memories-carousel">
+      <div class="memory-card"><img src="assets/photos/wedding_bride.jpg"><div class="title">1 year ago</div></div>
+      <div class="memory-card"><img src="assets/photos/trek.jpg"><div class="title">Manali memories</div></div>
+      <div class="memory-card"><img src="assets/photos/goa_beach.jpg"><div class="title">Recent highlights</div></div>
+      <div class="memory-card"><img src="assets/photos/diwali.jpg"><div class="title">Diwali 2025</div></div>
     </div>
 
-    <div class="grid">
-      ${PHOTOS.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
+    <div class="feed">
+      ${Object.keys(groups).map(date => `
+        <div class="date-header">${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'})}</div>
+        <div class="grid">
+          ${groups[date].map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
+        </div>
+      `).join('')}
     </div>
   `;
 }
 
 function renderCollections() {
-  const s = $('#s-collections');
-  s.innerHTML = `
+  return `
     <div class="top-bar">
-      <h2>Collections</h2>
+      <div class="logo-area" style="font-size: 22px;">Library</div>
+      <div class="top-actions">
+        <img src="assets/photos/aarav.jpg" class="avatar" alt="Me">
+      </div>
     </div>
-    <div class="albums">
-      <div class="album-card" data-action="go" data-href="#/people">
-        <div class="album-faces">
+    <div class="collections-grid">
+      <div class="album-card" onclick="navigate('#/people')">
+        <div class="album-cover faces-grid">
            <img src="${PEOPLE[1].face}">
            <img src="${PEOPLE[3].face}">
            <img src="${PEOPLE[4].face}">
            <img src="${PEOPLE[2].face}">
         </div>
-        <b>People & Pets</b>
+        <div class="album-title">People & Pets</div>
       </div>
-      <div class="album-card" data-action="toast" data-msg="Places not implemented in this demo">
-        <div class="album-cover" style="background-image:url(assets/photos/himalaya.jpg)"></div>
-        <b>Places</b>
+      <div class="album-card">
+        <div class="album-cover"><img src="assets/photos/himalaya.jpg"></div>
+        <div class="album-title">Places</div>
       </div>
     </div>
   `;
 }
 
 function renderPeople() {
-  const s = $('#s-people');
-  s.innerHTML = `
+  return `
     <div class="top-bar">
-      <button class="icon-btn" data-action="go" data-href="#/collections"><span class="ms">arrow_back</span></button>
-      <h2>People</h2>
+      <div class="logo-area">
+        <button onclick="navigate('#/collections')"><span class="ms">arrow_back</span></button>
+        <span style="margin-left: 12px; font-size: 20px;">People</span>
+      </div>
     </div>
-    <div class="face-grid">
+    <div class="people-grid">
       ${PEOPLE.map(p => `
-        <div class="face-item" data-action="go" data-href="#/person/${p.id}">
+        <div class="person-item" onclick="navigate('#/person/${p.id}')">
           <img src="${p.face}" alt="${p.name}">
-          <span>${p.short}</span>
+          <div class="person-name">${p.short}</div>
         </div>
       `).join('')}
     </div>
@@ -133,132 +150,93 @@ function renderPeople() {
 }
 
 function renderPerson() {
-  const s = $('#s-person');
   const person = PEOPLE.find(p => p.id === state.searchPersonContext);
-  if (!person) return navigate('#/people');
+  if (!person) { navigate('#/people'); return ''; }
 
   const personPhotos = PHOTOS.filter(p => p.people.includes(person.id));
 
-  s.innerHTML = `
+  return `
     <div class="top-bar">
-      <button class="icon-btn" data-action="go" data-href="#/people"><span class="ms">arrow_back</span></button>
-      <h2>${person.name}</h2>
-    </div>
-    
-    <div class="person-header">
-      <img src="${person.face}" class="person-hero-face">
-      <div class="person-search-box" data-action="go" data-href="#/search">
-        <span class="ms">search</span> Search inside ${person.short}'s photos...
+      <div class="logo-area">
+        <button onclick="navigate('#/people')"><span class="ms">arrow_back</span></button>
       </div>
     </div>
+    
+    <div class="person-hero">
+      <img src="${person.face}">
+      <h2>${person.name}</h2>
+      <button class="inside-search-btn" onclick="navigate('#/search')">
+        <span class="ms">search</span> Search inside ${person.short}'s photos
+      </button>
+    </div>
 
-    <div class="grid">
-      ${personPhotos.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
+    <div class="grid" style="padding-top: 16px;">
+      ${personPhotos.map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
     </div>
   `;
 }
 
 function renderSearch() {
-  const s = $('#s-search');
   const isPerson = state.searchPersonContext;
   const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
-  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search for a memory...';
+  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos';
 
-  s.innerHTML = `
-    <div class="search-header">
-      <button class="icon-btn" data-action="go" data-href="${isPerson ? '#/person/'+isPerson : '#/photos'}"><span class="ms">arrow_back</span></button>
-      <div class="search-input-wrap">
-        ${isPerson ? `<div class="search-chip-person"><img src="${person.face}"></div>` : ''}
-        <input type="text" id="search-input" value="${state.searchQuery}" placeholder="${placeholder}" autocomplete="off" autofocus>
-        ${state.searchQuery ? `<button class="icon-btn clear-btn" id="clear-search"><span class="ms">close</span></button>` : ''}
-      </div>
-    </div>
-    <div id="search-body"></div>
-  `;
-
-  const input = $('#search-input');
-  // Re-focus hack for iOS
-  setTimeout(() => input.focus(), 100);
-
-  input.addEventListener('input', (e) => {
-    state.searchQuery = e.target.value;
-    updateSearchBody();
-  });
-  
-  if ($('#clear-search')) {
-      $('#clear-search').addEventListener('click', () => {
-          state.searchQuery = '';
-          input.value = '';
-          updateSearchBody();
-          input.focus();
-      });
-  }
-
-  updateSearchBody();
-}
-
-function updateSearchBody() {
-  const body = $('#search-body');
-  const isPerson = state.searchPersonContext;
   let q = state.searchQuery.trim();
-  
-  if (isPerson) {
-      q = appendClue(q, PEOPLE.find(p => p.id === isPerson).short);
-  }
+  if (isPerson) q = appendClue(q, person.short);
 
-  if (!state.searchQuery.trim() && !isPerson) {
-    // Empty state
-    body.innerHTML = `
-      <div class="search-empty">
-        <div class="recall-prompt">
-          <h3>Try searching by what you remember</h3>
-          <div class="dim"><span class="ms" style="color:var(--c-who)">person</span> Who was there?</div>
-          <div class="dim"><span class="ms" style="color:var(--c-what)">celebration</span> What was the occasion?</div>
-          <div class="dim"><span class="ms" style="color:var(--c-when)">calendar_month</span> Roughly when?</div>
-          <div class="dim"><span class="ms" style="color:var(--c-where)">landscape</span> Where was it?</div>
-        </div>
-        <div class="examples">
-          <h4>Examples</h4>
-          ${HOME_EXAMPLES.map(ex => `<div class="ex-chip" data-q="${ex}">${ex}</div>`).join('')}
-        </div>
-      </div>
-    `;
-    
-    $$('.ex-chip').forEach(el => el.addEventListener('click', (e) => {
-      state.searchQuery = e.target.dataset.q;
-      renderSearch();
-    }));
-    return;
-  }
-
-  // Active search
   const parsed = parseQuery(q);
-  
-  // If we are in a person context, the pool is pre-filtered
   const pool = isPerson ? PHOTOS.filter(p => p.people.includes(isPerson)) : PHOTOS;
   const res = runSearch(parsed, pool);
   
   const strength = searchStrength(parsed);
   const hint = searchHint(parsed);
   const chips = clueChips(parsed);
-  
-  // Don't show the person chip in the search input area if they are implicitly added by context
   const displayChips = chips.filter(c => !(isPerson && c.dim === 'who' && c.value === isPerson));
 
-  body.innerHTML = `
-    <div class="search-meta">
-      <div class="strength-meter level-${strength.level}">
-        <div class="bars"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
-        <span>${strength.label}</span>
+  let bodyHtml = '';
+
+  if (!state.searchQuery.trim() && !isPerson) {
+    bodyHtml = `
+      <div class="black-screen">
+        <div class="search-prompt">
+          <h2>Try searching by what you remember</h2>
+          <div class="prompt-grid">
+            <div class="prompt-chip who">
+              <span class="ms">person</span>
+              <span class="label">Who was there?</span>
+            </div>
+            <div class="prompt-chip what">
+              <span class="ms">celebration</span>
+              <span class="label">What occasion?</span>
+            </div>
+            <div class="prompt-chip when">
+              <span class="ms">calendar_month</span>
+              <span class="label">Roughly when?</span>
+            </div>
+            <div class="prompt-chip where">
+              <span class="ms">landscape</span>
+              <span class="label">Where was it?</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="coach-hint tone-${hint.tone}">
-        <span class="ms">${hint.icon}</span> <span>${hint.html}</span>
+    `;
+  } else {
+    bodyHtml = `
+      <div class="coaching-box">
+        <div class="coaching-header">
+          <span>Findability: ${strength.label}</span>
+          <div class="meter-bar">
+            <div class="meter-fill" style="width: ${strength.pct}%; background: ${strength.level >= 3 ? '#A8DAB5' : strength.level >= 2 ? '#FDE293' : '#F6AEA9'}"></div>
+          </div>
+        </div>
+        <div class="coaching-text">${hint.html}</div>
       </div>
       
       ${displayChips.length > 0 ? `
-        <div class="parsed-chips">
+        <div class="active-chips">
           ${displayChips.map(c => `
-            <div class="clue-chip dim-${c.dim}" data-remove="${c.dim}:${c.value}">
+            <div class="filter-chip" data-remove="${c.dim}:${c.value}">
               ${c.label} <span class="ms">close</span>
             </div>
           `).join('')}
@@ -266,95 +244,90 @@ function updateSearchBody() {
       ` : ''}
       
       ${res.results.length > 0 ? `
-        <div class="refinements">
+        <div class="refinements-scroll">
           ${refinements(res.results, parsed, { exclude: isPerson }).map(r => `
-            <div class="ref-chip dim-${r.dim}" data-add="${r.text}">
+            <button class="refine-btn" data-add="${r.text}">
               ${r.face ? `<img src="${r.face}">` : ''} + ${r.label}
-            </div>
+            </button>
           `).join('')}
         </div>
       ` : ''}
+      
+      ${res.lowConfidence ? `<div style="padding: 0 16px 16px; color: #d7aefb; font-size: 14px;">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
+      ${res.results.length === 0 ? `<div style="padding: 32px; text-align: center; color: var(--on-surface-variant);">No photos found</div>` : ''}
+      
+      <div class="grid">
+        ${res.results.map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="top-bar search-mode">
+      <button onclick="navigate('${isPerson ? '#/person/'+isPerson : '#/photos'}')"><span class="ms">arrow_back</span></button>
+      <div class="search-input-wrapper">
+        <input type="text" id="search-input" value="${state.searchQuery}" placeholder="${placeholder}" autocomplete="off" autofocus>
+        ${state.searchQuery ? `<button id="clear-search"><span class="ms" style="font-size: 20px;">close</span></button>` : ''}
+      </div>
     </div>
-    
-    <div class="grid search-results">
-      ${res.lowConfidence ? `<div class="warn-banner">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
-      ${res.results.length === 0 ? `<div class="no-results">No photos found</div>` : ''}
-      ${res.results.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
+    <div id="search-body">
+      ${bodyHtml}
     </div>
   `;
+}
 
-  // Bind events
-  $$('.clue-chip').forEach(el => el.addEventListener('click', (e) => {
+function attachSearchEvents() {
+  const input = $('#search-input');
+  if (!input) return;
+  
+  setTimeout(() => input.focus(), 100);
+
+  input.addEventListener('input', (e) => {
+    state.searchQuery = e.target.value;
+    renderRoute(); // re-render whole search screen
+  });
+  
+  const clearBtn = $('#clear-search');
+  if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+          state.searchQuery = '';
+          renderRoute();
+      });
+  }
+
+  $$('.filter-chip').forEach(el => el.addEventListener('click', (e) => {
     const [dim, val] = e.currentTarget.dataset.remove.split(':');
     let sq = removeClue(state.searchQuery, dim, val);
-    if (isPerson && dim === 'who' && val === isPerson) {
-        // trying to remove the context person? Not allowed in context search, just ignore
-    } else {
-        state.searchQuery = sq;
-        renderSearch();
-    }
+    state.searchQuery = sq;
+    renderRoute();
   }));
 
-  $$('.ref-chip').forEach(el => el.addEventListener('click', (e) => {
+  $$('.refine-btn').forEach(el => el.addEventListener('click', (e) => {
     state.searchQuery = appendClue(state.searchQuery, e.currentTarget.dataset.add);
-    renderSearch();
+    renderRoute();
   }));
 }
 
 // --- Interactions ---
 
-document.body.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  
-  const act = btn.dataset.action;
-  
-  if (act === 'go') {
-    navigate(btn.dataset.href);
-  }
-  else if (act === 'toast') {
-    showToast(btn.dataset.msg);
-  }
-  else if (act === 'view') {
-    openViewer(btn.dataset.id);
-  }
-  else if (act === 'reopen') {
-    state.opens++;
-    state.route = 'photos';
-    state.searchQuery = '';
-    state.searchPersonContext = null;
-    navigate('#/photos');
-    showToast('Simulated app re-open');
-  }
-});
-
 function openViewer(id) {
   const p = PHOTOS.find(x => x.id === id);
   if (!p) return;
-  const v = $('#viewer');
+  const v = $('#viewer-root');
   v.innerHTML = `
-    <div class="v-top"><button class="icon-btn" onclick="document.getElementById('viewer').classList.add('hide')"><span class="ms">arrow_back</span></button></div>
-    <div class="v-img"><img src="${p.src}"></div>
-    <div class="v-bot">
-      <b>${p.title}</b>
-      <span>${new Date(p.date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'})}</span>
+    <div class="viewer-modal">
+      <div class="viewer-top">
+        <button onclick="document.getElementById('viewer-root').innerHTML=''"><span class="ms">arrow_back</span></button>
+      </div>
+      <div class="viewer-img">
+        <img src="${p.src}">
+      </div>
+      <div class="viewer-bottom">
+        <div class="date">${new Date(p.date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'})}</div>
+      </div>
     </div>
   `;
-  v.classList.remove('hide');
 }
-
-function showToast(msg) {
-  const t = $('#toast');
-  t.innerText = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// Clock
-setInterval(() => {
-  const d = new Date();
-  $('#clock').innerText = d.getHours() + ':' + d.getMinutes().toString().padStart(2, '0');
-}, 1000);
 
 // Init
 window.addEventListener('load', () => {
