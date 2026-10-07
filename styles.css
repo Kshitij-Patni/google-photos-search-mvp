@@ -18,14 +18,16 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; background: #111; color: var(--on-surface); font-family: var(--font-plain); }
+html, body { margin: 0; height: 100%; background: #111; color: var(--on-surface); font-family: var(--font-plain); overflow: hidden; }
 
 body {
   display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
 }
 
 .device {
-  width: 100vw; height: 100dvh;
+  width: 100%; height: 100%;
+  max-width: 412px; max-height: 868px;
   background: var(--bg);
   position: relative; overflow: hidden;
   display: flex; flex-direction: column;
@@ -33,7 +35,6 @@ body {
 
 @media (min-width: 600px) {
   .device {
-    width: 412px; height: 868px;
     border-radius: 32px;
     box-shadow: 0 0 0 10px #222, 0 20px 40px rgba(0,0,0,0.5);
   }
@@ -117,7 +118,7 @@ button {
 .tile { aspect-ratio: 1; background: var(--surface); position: relative; }
 .tile img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ---------- Bottom Nav ---------- */
+/* ---------- Bottom Nav & FAB ---------- */
 .bottom-nav {
   display: flex; height: 80px; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255,255,255,0.05); position: sticky; bottom: 0; z-index: 50;
@@ -133,6 +134,18 @@ button {
 .nav-item.active { color: var(--on-surface); }
 .nav-item.active .icon-box { background: var(--primary-container); color: var(--on-primary-container); }
 .nav-item.active .ms { font-variation-settings: 'FILL' 1; }
+
+.fab-search {
+  position: absolute; right: 16px; bottom: 96px; z-index: 60;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); color: var(--on-surface);
+  height: 56px; padding: 0 20px 0 16px; border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  font-family: var(--font-brand); font-weight: 500; font-size: 15px;
+  cursor: pointer; transition: transform 0.2s;
+}
+.fab-search:hover { transform: scale(1.02); }
+.fab-search .ms { color: var(--primary); }
 
 /* ---------- Search View (MVP Feature 2) ---------- */
 .black-screen {

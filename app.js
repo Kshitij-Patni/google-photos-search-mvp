@@ -43,6 +43,15 @@ function renderRoute() {
   const n = $(`#nav-${activeNav}`);
   if (n) n.classList.add('active');
 
+  const fab = $('.fab-search');
+  if (fab) {
+    if (state.route === 'search' || state.route === 'person') {
+      fab.style.display = 'none';
+    } else {
+      fab.style.display = 'flex';
+    }
+  }
+
   const root = $('#app-root');
 
   if (state.route === 'photos') root.innerHTML = renderPhotos();
