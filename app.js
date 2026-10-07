@@ -6,22 +6,17 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 let state = {
-  route: '',
+  route: 'photos',
   searchQuery: '',
   searchPersonContext: null,
   opens: 0
 };
 
-// --- Routing ---
-function navigate(hash) {
-  if (!hash) hash = '#/photos';
-  window.location.hash = hash;
-}
-
-window.addEventListener('hashchange', () => {
+// --- Robust Routing ---
+function handleRouting() {
   const hash = window.location.hash || '#/photos';
   const parts = hash.split('/');
-  state.route = parts[1];
+  state.route = parts[1] || 'photos';
   
   if (state.route === 'person') {
     state.searchPersonContext = parts[2];
@@ -32,9 +27,28 @@ window.addEventListener('hashchange', () => {
   if (state.route === 'photos') state.opens++;
 
   renderRoute();
-});
+}
+
+function navigate(hash) {
+  if (!hash) hash = '#/photos';
+  if (window.location.hash === hash) {
+    handleRouting();
+  } else {
+    window.location.hash = hash;
+  }
+}
+
+window.addEventListener('hashchange', handleRouting);
+window.addEventListener('DOMContentLoaded', handleRouting);
+window.addEventListener('load', handleRouting);
 
 function renderRoute() {
+  if (!state.route) {
+    const hash = window.location.hash || '#/photos';
+    const parts = hash.split('/');
+    state.route = parts[1] || 'photos';
+  }
+
   $$('.nav-pill-item').forEach(btn => btn.classList.remove('active'));
 
   let activeNav = state.route;
@@ -53,13 +67,20 @@ function renderRoute() {
   }
 
   const root = $('#app-root');
+  if (!root) return;
 
-  if (state.route === 'photos') root.innerHTML = renderPhotos();
-  else if (state.route === 'search') root.innerHTML = renderSearch();
-  else if (state.route === 'collections') root.innerHTML = renderCollections();
-  else if (state.route === 'create') root.innerHTML = renderCreate();
-  else if (state.route === 'people') root.innerHTML = renderPeople();
-  else if (state.route === 'person') root.innerHTML = renderPerson();
+  try {
+    if (state.route === 'photos') root.innerHTML = renderPhotos();
+    else if (state.route === 'search') root.innerHTML = renderSearch();
+    else if (state.route === 'collections') root.innerHTML = renderCollections();
+    else if (state.route === 'create') root.innerHTML = renderCreate();
+    else if (state.route === 'people') root.innerHTML = renderPeople();
+    else if (state.route === 'person') root.innerHTML = renderPerson();
+    else root.innerHTML = renderPhotos();
+  } catch (err) {
+    console.error("Error rendering route:", err);
+    root.innerHTML = renderPhotos();
+  }
 
   if (state.route === 'photos') {
     startTicker();
@@ -73,8 +94,8 @@ function renderRoute() {
 // --- Screens ---
 
 function renderPhotos() {
-  // Sort photos by date
-  const sortedPhotos = [...PHOTOS].sort((a,b) => b.date.localeCompare(a.date));
+  const photoList = (typeof PHOTOS !== 'undefined' && Array.isArray(PHOTOS)) ? PHOTOS : [];
+  const sortedPhotos = [...photoList].sort((a,b) => b.date.localeCompare(a.date));
   
   // Group by date
   const groups = {};
@@ -471,10 +492,14 @@ function startTicker() {
       textEl.style.opacity = '0';
       tagsEl.style.opacity = '0';
       setTimeout(() => {
-        textEl.textContent = item.text;
-        tagsEl.innerHTML = item.tags.map(t => `<span class="sim-tag ${t.dim}">${t.label}</span>`).join('');
-        textEl.style.opacity = '1';
-        tagsEl.style.opacity = '1';
+        const tEl = document.getElementById('simulatedTicker');
+        const gEl = document.getElementById('simulatorTags');
+        if (tEl && gEl) {
+          tEl.textContent = item.text;
+          gEl.innerHTML = item.tags.map(t => `<span class="sim-tag ${t.dim}">${t.label}</span>`).join('');
+          tEl.style.opacity = '1';
+          gEl.style.opacity = '1';
+        }
       }, 200);
     }
   }, 3400);
@@ -506,7 +531,8 @@ function closeSearchHelpModal(e) {
 // --- Interactions ---
 
 function openViewer(id) {
-  const p = PHOTOS.find(x => x.id === id);
+  const photoList = (typeof PHOTOS !== 'undefined' && Array.isArray(PHOTOS)) ? PHOTOS : [];
+  const p = photoList.find(x => x.id === id);
   if (!p) return;
   const v = $('#viewer-root');
   v.innerHTML = `
@@ -525,8 +551,5 @@ function openViewer(id) {
   `;
 }
 
-// Init
-window.addEventListener('load', () => {
-  const hash = window.location.hash || '#/photos';
-  navigate(hash);
-});
+// Execute routing immediately on script evaluation
+handleRouting();
