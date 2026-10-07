@@ -79,13 +79,13 @@ function renderPhotos() {
     </div>
     
     <div class="memories">
-      <div class="mem-card"><img src="assets/photos/wedding_bride.jpg"><span>1 year ago</span></div>
-      <div class="mem-card"><img src="assets/photos/trek.jpg"><span>Manali memories</span></div>
-      <div class="mem-card"><img src="assets/photos/goa_beach.jpg"><span>Recent highlights</span></div>
+      <div class="memory"><img src="assets/photos/wedding_bride.jpg"><div class="m-title">1 year ago</div></div>
+      <div class="memory"><img src="assets/photos/trek.jpg"><div class="m-title">Manali memories</div></div>
+      <div class="memory"><img src="assets/photos/goa_beach.jpg"><div class="m-title">Recent highlights</div></div>
     </div>
 
-    <div class="feed">
-      ${PHOTOS.map(p => `<div class="p-thumb" style="background-image:url(${p.src})" data-action="view" data-id="${p.id}"></div>`).join('')}
+    <div class="grid">
+      ${PHOTOS.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
     </div>
   `;
 }
@@ -152,8 +152,8 @@ function renderPerson() {
       </div>
     </div>
 
-    <div class="feed">
-      ${personPhotos.map(p => `<div class="p-thumb" style="background-image:url(${p.src})" data-action="view" data-id="${p.id}"></div>`).join('')}
+    <div class="grid">
+      ${personPhotos.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
     </div>
   `;
 }
@@ -276,10 +276,10 @@ function updateSearchBody() {
       ` : ''}
     </div>
     
-    <div class="feed search-results">
+    <div class="grid search-results">
       ${res.lowConfidence ? `<div class="warn-banner">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
       ${res.results.length === 0 ? `<div class="no-results">No photos found</div>` : ''}
-      ${res.results.map(p => `<div class="p-thumb" style="background-image:url(${p.src})" data-action="view" data-id="${p.id}"></div>`).join('')}
+      ${res.results.map(p => `<div class="tile" data-action="view" data-id="${p.id}"><img src="${p.src}"></div>`).join('')}
     </div>
   `;
 
