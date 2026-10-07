@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Google Photos — Better Photo Retrieval MVP</title>
+  <meta name="description" content="Interactive prototype that improves photo retrieval in Google Photos: search awareness on every open, a recall-based search prompt (who, what, when, where), and search inside a person's photos.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:title" content="Google Photos — Better Photo Retrieval MVP">
+  <meta property="og:description" content="Recall-based search prototype grounded in user research (5 interviews, 56 survey responses).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 4A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%234285F4' d='M44 24A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%2334A853' d='M24 44A10 10 0 0 0 24 24Z'/%3E%3Cpath fill='%23FBBC04' d='M4 24A10 10 0 0 0 24 24Z'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- Left: prototype guide (desktop only) -->
+  <aside class="side" aria-label="Prototype guide">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 4A10 10 0 0 0 24 24Z"/><path fill="#4285F4" d="M44 24A10 10 0 0 0 24 24Z"/>
+        <path fill="#34A853" d="M24 44A10 10 0 0 0 24 24Z"/><path fill="#FBBC04" d="M4 24A10 10 0 0 0 24 24Z"/>
+      </svg>
+      Google Photos <span class="badge-mvp">MVP</span>
+    </div>
+    <h1>Find any photo by what you <em>remember</em></h1>
+    <p>A clickable prototype that makes photo retrieval easier — built around how people actually recall memories.</p>
+
+    <h2>Walk through the flow</h2>
+    <button class="step" data-action="go" data-href="#/photos">
+      <span class="num">1</span>
+      <div><b>Search awareness on every open</b><span>Animated search bar, rotating tip & pulsing search button each time the app opens.</span></div>
+    </button>
+    <button class="step" data-action="go" data-href="#/search">
+      <span class="num">2</span>
+      <div><b>Recall prompt on the search screen</b><span>Fill who · what · when · where. Live “findability” meter & coaching.</span></div>
+    </button>
+    <button class="step" data-action="go" data-href="#/collections">
+      <span class="num">3</span>
+      <div><b>Collections → People</b><span>Entry point to face-based browsing.</span></div>
+    </button>
+    <button class="step" data-action="go" data-href="#/people">
+      <span class="num">4</span>
+      <div><b>Pick a face</b><span>All faces are clickable.</span></div>
+    </button>
+    <button class="step" data-action="go" data-href="#/person/ananya">
+      <span class="num">5</span>
+      <div><b>Search inside a face</b><span>New search bar alongside filters — e.g. “wedding 2026”.</span></div>
+    </button>
+    <button class="reopen-btn" data-action="reopen"><span class="ms">refresh</span>Simulate re-opening the app</button>
+    <small>All photos are AI-generated, fictional people used as dummy data.</small>
+  </aside>
+
+  <!-- Phone -->
+  <main class="phone">
+    <div class="viewport" id="viewport">
+      <div class="statusbar" aria-hidden="true">
+        <span id="clock">5:11</span>
+        <span class="icons"><span class="ms">notifications_off</span><span class="ms">wifi</span><span class="ms">signal_cellular_alt</span><span class="battery">74</span></span>
+      </div>
+
+      <section class="screen" id="s-photos" aria-label="Photos"></section>
+      <section class="screen" id="s-search" aria-label="Search"></section>
+      <section class="screen" id="s-results" aria-label="Search results"></section>
+      <section class="screen" id="s-collections" aria-label="Collections"></section>
+      <section class="screen" id="s-people" aria-label="People"></section>
+      <section class="screen" id="s-person" aria-label="Person"></section>
+
+      <nav class="navbar" id="navbar" aria-label="Main">
+        <div class="nav-pill">
+          <button class="nav-item" id="nav-photos" data-action="go" data-href="#/photos"><span class="ms">photo</span>Photos</button>
+          <button class="nav-item" id="nav-collections" data-action="go" data-href="#/collections"><span class="ms">bar_chart</span>Collections</button>
+          <button class="nav-item" id="nav-create" data-action="toast" data-msg="Create isn't part of this prototype">Create</button>
+        </div>
+        <div class="fab-wrap">
+          <button class="fab" id="fab" data-action="go" data-href="#/search" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="10" cy="12" r="6"/><path d="M14.5 16.5 20 22"/>
+              <path d="M18.5 1.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="fab-label">Search</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="viewer hide" id="viewer" role="dialog" aria-label="Photo viewer"></div>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </main>
+
+  <!-- Right: research (desktop only) -->
+  <aside class="side" aria-label="Research insights">
+    <h2 style="margin-top:0">Why these changes</h2>
+    <p>5 interviews + 56 survey responses + live search tests.</p>
+    <div class="stat who"><div class="big">60%</div><div class="lbl">of users never used / didn't know keyword search → <b>awareness nudge on every open</b></div><div class="bar"><i style="width:60%"></i></div></div>
+    <div class="stat where"><div class="big">100%</div><div class="lbl">recall the event, rough timeline, people & background → <b>who · what · when · where prompt</b></div><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="stat when"><div class="big">66.7%</div><div class="lbl">success for searches with a date / timeline → <b>“when” is nudged hardest</b></div><div class="bar"><i style="width:66.7%"></i></div></div>
+    <div class="stat what"><div class="big">50%</div><div class="lbl">success for event or people keywords alone → <b>combine clues</b></div><div class="bar"><i style="width:50%"></i></div></div>
+    <div class="stat wear"><div class="big">25%</div><div class="lbl">success for clothing / visual details (80% recall them!) → <b>flagged as low-accuracy</b></div><div class="bar"><i style="width:25%"></i></div></div>
+    <div class="stat who"><div class="big">37.5%</div><div class="lbl">use the People/face feature (57.1% first-try success) → <b>search inside a face</b></div><div class="bar"><i style="width:57.1%"></i></div></div>
+  </aside>
+
+  <script src="data.js"></script>
+  <script src="search.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
