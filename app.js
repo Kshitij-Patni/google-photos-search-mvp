@@ -1,5 +1,5 @@
 /* =========================================================
-   Application UI Logic for Realistic Google Photos MVP
+   Application UI Logic for Realistic Google Photos MVP (Redesigned)
    ========================================================= */
 
 const $ = (s) => document.querySelector(s);
@@ -35,7 +35,7 @@ window.addEventListener('hashchange', () => {
 });
 
 function renderRoute() {
-  $$('.nav-item').forEach(btn => btn.classList.remove('active'));
+  $$('.nav-pill-item').forEach(btn => btn.classList.remove('active'));
 
   let activeNav = state.route;
   if (state.route === 'people' || state.route === 'person') activeNav = 'collections';
@@ -43,12 +43,12 @@ function renderRoute() {
   const n = $(`#nav-${activeNav}`);
   if (n) n.classList.add('active');
 
-  const fab = $('.fab-search');
-  if (fab) {
+  const bottomContainer = $('#bottomNavContainer');
+  if (bottomContainer) {
     if (state.route === 'search' || state.route === 'person') {
-      fab.style.display = 'none';
+      bottomContainer.style.display = 'none';
     } else {
-      fab.style.display = 'flex';
+      bottomContainer.style.display = 'flex';
     }
   }
 
@@ -57,8 +57,15 @@ function renderRoute() {
   if (state.route === 'photos') root.innerHTML = renderPhotos();
   else if (state.route === 'search') root.innerHTML = renderSearch();
   else if (state.route === 'collections') root.innerHTML = renderCollections();
+  else if (state.route === 'create') root.innerHTML = renderCreate();
   else if (state.route === 'people') root.innerHTML = renderPeople();
   else if (state.route === 'person') root.innerHTML = renderPerson();
+
+  if (state.route === 'photos') {
+    startTicker();
+  } else {
+    stopTicker();
+  }
 
   if (state.route === 'search') attachSearchEvents();
 }
@@ -77,29 +84,89 @@ function renderPhotos() {
   });
 
   return `
+    <!-- Top Action Bar (Matching Official Redesign) -->
     <div class="top-bar">
-      <div class="logo-area">
-        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 4A10 10 0 0 0 24 24Z"/><path fill="#4285F4" d="M44 24A10 10 0 0 0 24 24Z"/><path fill="#34A853" d="M24 44A10 10 0 0 0 24 24Z"/><path fill="#FBBC04" d="M4 24A10 10 0 0 0 24 24Z"/></svg>
-        Google Photos
+      <!-- Backup complete pill button -->
+      <div class="backup-pill" title="Backup Complete">
+        <span>Backup complete</span>
       </div>
+      <!-- Right Action Cluster: Add, Notifications, Avatar K -->
       <div class="top-actions">
-        <img src="assets/photos/aarav.jpg" class="avatar" alt="Me" onclick="navigate('#/photos')">
+        <div class="action-icon" title="Add" onclick="navigate('#/create')">
+          <span class="ms">add</span>
+          <div class="red-dot"></div>
+        </div>
+        <div class="action-icon" title="Notifications" onclick="alert('No new notifications')">
+          <span class="ms">notifications</span>
+        </div>
+        <div class="profile-avatar" title="Account">
+          k
+        </div>
       </div>
     </div>
-    
-    <div class="search-nudge" onclick="navigate('#/search')">
-      <span class="ms">search</span>
-      <div class="search-nudge-text">
-        <strong>Search for a memory...</strong>
-        ${OPEN_TIPS[state.opens % OPEN_TIPS.length].body}
+
+    <!-- Creative AI Keyword Discovery Hero Card -->
+    <div class="ai-discovery-card" id="aiDiscoveryCard">
+      <div class="discovery-header">
+        <div class="discovery-badge">
+          <span class="ms" style="font-size:16px; color:#A8C7FA;">auto_awesome</span>
+          <span>KEYWORD SEARCH</span>
+        </div>
+        <button class="discovery-info-btn" onclick="openSearchHelpModal()" title="How it works">
+          <span class="ms" style="font-size:18px;">help_outline</span>
+        </button>
+      </div>
+
+      <div class="discovery-title">Find photos by what you remember</div>
+      <div class="discovery-desc">
+        Type any clues — <b>who</b> was there, <b>what</b> event, <b>where</b>, or rough <b>year</b>:
+      </div>
+
+      <!-- Live Animated Ticker Demonstration -->
+      <div class="keyword-simulator-box" onclick="navigate('#/search')">
+        <div class="simulator-input">
+          <span class="ms" style="font-size:18px; color:#A8C7FA;">search</span>
+          <span class="simulated-text" id="simulatedTicker">"Ananya wedding Feb 2026"</span>
+          <span class="ticker-cursor">|</span>
+        </div>
+        <div class="simulator-tags" id="simulatorTags">
+          <span class="sim-tag who">Ananya</span>
+          <span class="sim-tag what">Wedding</span>
+          <span class="sim-tag when">Feb 2026</span>
+        </div>
+      </div>
+
+      <!-- Quick Interactive Keyword Pills -->
+      <div class="discovery-chips-row">
+        <button class="discovery-pill" onclick="setSearchText('Ananya wedding Feb 2026')">
+          <span>💍 Ananya wedding</span>
+        </button>
+        <button class="discovery-pill" onclick="setSearchText('Goa beach sunset last winter')">
+          <span>🏖️ Goa beach sunset</span>
+        </button>
+        <button class="discovery-pill" onclick="setSearchText('Diwali 2025 with Mom')">
+          <span>🪔 Diwali with Mom</span>
+        </button>
+        <button class="discovery-pill" onclick="setSearchText('Rohan in the mountains')">
+          <span>⛰️ Rohan mountains</span>
+        </button>
+      </div>
+
+      <div class="discovery-footer">
+        <button class="how-it-works-btn" onclick="openSearchHelpModal()">
+          <span>Learn 4-clue recall</span>
+        </button>
+        <button class="try-search-cta" onclick="navigate('#/search')">
+          <span>Open Search</span> <span class="ms" style="font-size:16px;">arrow_forward</span>
+        </button>
       </div>
     </div>
     
     <div class="memories-carousel">
-      <div class="memory-card"><img src="assets/photos/wedding_bride.jpg"><div class="title">1 year ago</div></div>
-      <div class="memory-card"><img src="assets/photos/trek.jpg"><div class="title">Manali memories</div></div>
-      <div class="memory-card"><img src="assets/photos/goa_beach.jpg"><div class="title">Recent highlights</div></div>
-      <div class="memory-card"><img src="assets/photos/diwali.jpg"><div class="title">Diwali 2025</div></div>
+      <div class="memory-card" onclick="openViewer('p11')"><img src="assets/photos/wedding_bride.jpg"><div class="title">1 year ago</div></div>
+      <div class="memory-card" onclick="openViewer('p24')"><img src="assets/photos/trek.jpg"><div class="title">Manali memories</div></div>
+      <div class="memory-card" onclick="openViewer('p16')"><img src="assets/photos/goa_beach.jpg"><div class="title">Recent highlights</div></div>
+      <div class="memory-card" onclick="openViewer('p18')"><img src="assets/photos/diwali.jpg"><div class="title">Diwali 2025</div></div>
     </div>
 
     <div class="feed">
@@ -116,9 +183,11 @@ function renderPhotos() {
 function renderCollections() {
   return `
     <div class="top-bar">
-      <div class="logo-area" style="font-size: 22px;">Library</div>
+      <div class="backup-pill" style="border:none; background:transparent; padding:0;">
+        <span style="font-family:var(--font-brand); font-size:22px; font-weight:500;">Collections</span>
+      </div>
       <div class="top-actions">
-        <img src="assets/photos/aarav.jpg" class="avatar" alt="Me">
+        <div class="profile-avatar">k</div>
       </div>
     </div>
     <div class="collections-grid">
@@ -129,11 +198,58 @@ function renderCollections() {
            <img src="${PEOPLE[4].face}">
            <img src="${PEOPLE[2].face}">
         </div>
-        <div class="album-title">People & Pets</div>
+        <div class="album-title">People & Pets (6)</div>
       </div>
-      <div class="album-card">
+      <div class="album-card" onclick="navigate('#/search'); setTimeout(()=>{state.searchQuery='mountains'; renderRoute();}, 50);">
         <div class="album-cover"><img src="assets/photos/himalaya.jpg"></div>
-        <div class="album-title">Places</div>
+        <div class="album-title">Places: Mountains & Goa</div>
+      </div>
+      <div class="album-card" onclick="navigate('#/search'); setTimeout(()=>{state.searchQuery='wedding'; renderRoute();}, 50);">
+        <div class="album-cover"><img src="assets/photos/wedding_family.jpg"></div>
+        <div class="album-title">Weddings & Ceremonies</div>
+      </div>
+      <div class="album-card" onclick="navigate('#/search'); setTimeout(()=>{state.searchQuery='diwali'; renderRoute();}, 50);">
+        <div class="album-cover"><img src="assets/photos/rangoli.jpg"></div>
+        <div class="album-title">Festivals: Diwali</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCreate() {
+  return `
+    <div class="top-bar">
+      <div class="backup-pill" style="border:none; background:transparent; padding:0;">
+        <span style="font-family:var(--font-brand); font-size:22px; font-weight:500;">Create</span>
+      </div>
+      <div class="top-actions">
+        <div class="profile-avatar">k</div>
+      </div>
+    </div>
+    <div class="collections-grid">
+      <div class="album-card" onclick="alert('✨ Generating Highlight Reel from your top photos!')">
+        <div class="album-cover" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #1a73e8, #7b1fa2);">
+          <span class="ms" style="font-size:42px; color:#fff;">movie</span>
+        </div>
+        <div class="album-title">Highlight Video</div>
+      </div>
+      <div class="album-card" onclick="alert('📸 3D Cinematic Photo generator ready!')">
+        <div class="album-cover" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #2e7d32, #f57f17);">
+          <span class="ms" style="font-size:42px; color:#fff;">auto_awesome</span>
+        </div>
+        <div class="album-title">Cinematic Photo</div>
+      </div>
+      <div class="album-card" onclick="alert('🎨 Collage generator opened!')">
+        <div class="album-cover" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #c2185b, #e65100);">
+          <span class="ms" style="font-size:42px; color:#fff;">grid_view</span>
+        </div>
+        <div class="album-title">Photo Collage</div>
+      </div>
+      <div class="album-card" onclick="alert('🎞️ Animation creator ready!')">
+        <div class="album-cover" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #00838f, #0277bd);">
+          <span class="ms" style="font-size:42px; color:#fff;">animation</span>
+        </div>
+        <div class="album-title">Animation</div>
       </div>
     </div>
   `;
@@ -188,7 +304,7 @@ function renderPerson() {
 function renderSearch() {
   const isPerson = state.searchPersonContext;
   const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
-  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos';
+  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos by who, what, when, where...';
 
   let q = state.searchQuery.trim();
   if (isPerson) q = appendClue(q, person.short);
@@ -208,21 +324,31 @@ function renderSearch() {
     bodyHtml = `
       <div class="black-screen">
         <div class="search-prompt">
-          <h2>Try searching by what you remember</h2>
+          <h2>Try searching what you remember</h2>
+          
+          <!-- Suggested Quick Queries -->
+          <div class="quick-suggest-row">
+            ${HOME_EXAMPLES.map(ex => `
+              <div class="quick-chip" onclick="setSearchText('${ex.replace(/'/g, "\\'")}')">
+                ✨ ${ex}
+              </div>
+            `).join('')}
+          </div>
+
           <div class="prompt-grid">
-            <div class="prompt-chip who">
+            <div class="prompt-chip who" onclick="setSearchText('Aarav and Mom')">
               <span class="ms">person</span>
               <span class="label">Who was there?</span>
             </div>
-            <div class="prompt-chip what">
+            <div class="prompt-chip what" onclick="setSearchText('Wedding')">
               <span class="ms">celebration</span>
               <span class="label">What occasion?</span>
             </div>
-            <div class="prompt-chip when">
+            <div class="prompt-chip when" onclick="setSearchText('Last winter')">
               <span class="ms">calendar_month</span>
               <span class="label">Roughly when?</span>
             </div>
-            <div class="prompt-chip where">
+            <div class="prompt-chip where" onclick="setSearchText('Goa beach')">
               <span class="ms">landscape</span>
               <span class="label">Where was it?</span>
             </div>
@@ -262,8 +388,8 @@ function renderSearch() {
         </div>
       ` : ''}
       
-      ${res.lowConfidence ? `<div style="padding: 0 16px 16px; color: #d7aefb; font-size: 14px;">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
-      ${res.results.length === 0 ? `<div style="padding: 32px; text-align: center; color: var(--on-surface-variant);">No photos found</div>` : ''}
+      ${res.lowConfidence ? `<div style="padding: 0 16px 12px; color: #d7aefb; font-size: 13.5px;">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
+      ${res.results.length === 0 ? `<div style="padding: 32px; text-align: center; color: var(--on-surface-variant);">No photos found. Try a person, place, or rough year.</div>` : ''}
       
       <div class="grid">
         ${res.results.map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
@@ -285,15 +411,20 @@ function renderSearch() {
   `;
 }
 
+function setSearchText(text) {
+  state.searchQuery = text;
+  navigate('#/search');
+}
+
 function attachSearchEvents() {
   const input = $('#search-input');
   if (!input) return;
   
-  setTimeout(() => input.focus(), 100);
+  setTimeout(() => input.focus(), 80);
 
   input.addEventListener('input', (e) => {
     state.searchQuery = e.target.value;
-    renderRoute(); // re-render whole search screen
+    renderRoute();
   });
   
   const clearBtn = $('#clear-search');
@@ -317,6 +448,61 @@ function attachSearchEvents() {
   }));
 }
 
+// --- Dynamic Ticker & Discovery Logic ---
+
+const TICKER_SAMPLES = [
+  { text: '"Ananya wedding Feb 2026"', tags: [{label:'Ananya', dim:'who'}, {label:'Wedding', dim:'what'}, {label:'Feb 2026', dim:'when'}] },
+  { text: '"Me and Rohan in mountains"', tags: [{label:'Rohan', dim:'who'}, {label:'Mountains', dim:'where'}, {label:'Trek', dim:'what'}] },
+  { text: '"Diwali 2025 with Mom and Dad"', tags: [{label:'Mom & Dad', dim:'who'}, {label:'Diwali', dim:'what'}, {label:'2025', dim:'when'}] },
+  { text: '"Goa beach sunset last winter"', tags: [{label:'Goa Beach', dim:'where'}, {label:'Sunset', dim:'where'}, {label:'Winter', dim:'when'}] }
+];
+
+let tickerIdx = 0;
+let tickerTimer = null;
+
+function startTicker() {
+  stopTicker();
+  tickerTimer = setInterval(() => {
+    tickerIdx = (tickerIdx + 1) % TICKER_SAMPLES.length;
+    const item = TICKER_SAMPLES[tickerIdx];
+    const textEl = document.getElementById('simulatedTicker');
+    const tagsEl = document.getElementById('simulatorTags');
+    if (textEl && tagsEl) {
+      textEl.style.opacity = '0';
+      tagsEl.style.opacity = '0';
+      setTimeout(() => {
+        textEl.textContent = item.text;
+        tagsEl.innerHTML = item.tags.map(t => `<span class="sim-tag ${t.dim}">${t.label}</span>`).join('');
+        textEl.style.opacity = '1';
+        tagsEl.style.opacity = '1';
+      }, 200);
+    }
+  }, 3400);
+}
+
+function stopTicker() {
+  if (tickerTimer) {
+    clearInterval(tickerTimer);
+    tickerTimer = null;
+  }
+}
+
+function dismissCoachmark(e) {
+  if (e) e.stopPropagation();
+  const el = document.getElementById('searchCoachmark');
+  if (el) el.style.display = 'none';
+}
+
+function openSearchHelpModal() {
+  const el = document.getElementById('searchHelpModal');
+  if (el) el.classList.add('open');
+}
+
+function closeSearchHelpModal(e) {
+  const el = document.getElementById('searchHelpModal');
+  if (el) el.classList.remove('open');
+}
+
 // --- Interactions ---
 
 function openViewer(id) {
@@ -332,6 +518,7 @@ function openViewer(id) {
         <img src="${p.src}">
       </div>
       <div class="viewer-bottom">
+        <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">${p.title}</div>
         <div class="date">${new Date(p.date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'})}</div>
       </div>
     </div>

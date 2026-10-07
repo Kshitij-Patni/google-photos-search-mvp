@@ -10,33 +10,123 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="device">
-    <div class="screen" id="app-root">
-       <!-- App UI injected here -->
-    </div>
-    
-    <nav class="bottom-nav">
-      <button class="nav-item active" id="nav-photos" onclick="navigate('#/photos')">
-        <div class="icon-box"><span class="ms">photo</span></div>
-        <span>Photos</span>
-      </button>
-      <button class="nav-item" id="nav-memories" onclick="alert('Not in MVP')">
-        <div class="icon-box"><span class="ms">history</span></div>
-        <span>Memories</span>
-      </button>
-      <button class="nav-item" id="nav-collections" onclick="navigate('#/collections')">
-        <div class="icon-box"><span class="ms">photo_library</span></div>
-        <span>Library</span>
-      </button>
-    </nav>
-    
-    <button class="fab-search" onclick="navigate('#/search')">
-      <span class="ms">search</span>
-      Search
-    </button>
-    
-    <div id="viewer-root"></div>
-  </main>
+  <div class="device-wrapper">
+    <main class="device">
+      <!-- Android Status Bar -->
+      <div class="status-bar">
+        <div class="status-left">
+          <span class="status-time">6:29</span>
+          <div class="status-icons-mini">
+            <span class="ms" style="font-size:14px;">photo</span>
+            <span class="ms" style="font-size:14px;">chat</span>
+          </div>
+        </div>
+        <div class="status-right">
+          <span>5G</span>
+          <span style="font-size: 10px; opacity: 0.8;">R</span>
+          <span class="ms" style="font-size:15px;">wifi</span>
+          <span class="ms" style="font-size:15px;">signal_cellular_4_bar</span>
+          <div class="battery-pill">77</div>
+        </div>
+      </div>
+
+      <div class="screen" id="app-root">
+         <!-- App UI injected here -->
+      </div>
+      
+      <!-- Redesigned Floating Navigation Area: Pill Bar + Separated Circular Search FAB -->
+      <div class="floating-nav-container" id="bottomNavContainer">
+        <!-- Floating Coachmark Tooltip pointing to Search Button -->
+        <div class="search-coachmark-tooltip" id="searchCoachmark">
+          <div class="coachmark-content" onclick="navigate('#/search')">
+            <span class="ms coachmark-sparkle">auto_awesome</span>
+            <div class="coachmark-text">
+              <strong>Keyword Search</strong>
+              <span>Tap to search by what you remember</span>
+            </div>
+          </div>
+          <button class="coachmark-close-btn" onclick="dismissCoachmark(event)" title="Dismiss">
+            <span class="ms" style="font-size:16px;">close</span>
+          </button>
+          <div class="coachmark-pointer-arrow"></div>
+        </div>
+
+        <nav class="floating-nav-pill">
+          <button class="nav-pill-item active" id="nav-photos" onclick="navigate('#/photos')">
+            <span class="ms active-icon">photo</span>
+            <span>Photos</span>
+          </button>
+          <button class="nav-pill-item" id="nav-collections" onclick="navigate('#/collections')">
+            <span>Collections</span>
+          </button>
+          <button class="nav-pill-item" id="nav-create" onclick="navigate('#/create')">
+            <span>Create</span>
+          </button>
+        </nav>
+        
+        <button class="standalone-search-fab has-pulse" id="fab-search" onclick="navigate('#/search')" title="Search">
+          <span class="ms">search</span>
+          <div class="fab-pulse-halo"></div>
+        </button>
+      </div>
+
+      <!-- Android Bottom 3-Button Navigation Bar -->
+      <div class="android-nav-bar">
+        <div class="android-btn" title="Recents" onclick="alert('Recent Apps')">
+          <div class="recents-icon"><span></span><span></span><span></span></div>
+        </div>
+        <div class="android-btn" title="Home" onclick="navigate('#/photos')">
+          <div class="home-icon"></div>
+        </div>
+        <div class="android-btn" title="Back" onclick="history.back()">
+          <span class="ms" style="font-size:18px;">arrow_back_ios</span>
+        </div>
+      </div>
+      
+      <!-- How Keyword Search Works Modal -->
+      <div class="help-modal-overlay" id="searchHelpModal" onclick="closeSearchHelpModal(event)">
+        <div class="help-modal-sheet" onclick="event.stopPropagation()">
+          <div class="help-modal-handle"></div>
+          <div class="help-modal-header">
+            <div class="help-modal-badge">
+              <span class="ms" style="font-size:18px; color:#A8C7FA;">auto_awesome</span>
+              <span>HOW KEYWORD SEARCH WORKS</span>
+            </div>
+            <button class="help-close-btn" onclick="closeSearchHelpModal()"><span class="ms">close</span></button>
+          </div>
+          <h2 class="help-modal-title">Search using natural recall clues</h2>
+          <p class="help-modal-desc">Instead of browsing thousands of pictures, describe any combination of memory clues:</p>
+          
+          <div class="help-dims-grid">
+            <div class="help-dim-card who" onclick="setSearchText('Aarav and Mom')">
+              <div class="dim-icon-pill"><span class="ms">person</span> <b>Who</b></div>
+              <div class="dim-examples">Aarav, Ananya, Mom, Dad, Rohan, Priya</div>
+            </div>
+            <div class="help-dim-card what" onclick="setSearchText('Wedding')">
+              <div class="dim-icon-pill"><span class="ms">celebration</span> <b>What</b></div>
+              <div class="dim-examples">Wedding, Diwali, Birthday, Trek, Convocation</div>
+            </div>
+            <div class="help-dim-card when" onclick="setSearchText('Last winter')">
+              <div class="dim-icon-pill"><span class="ms">calendar_month</span> <b>When</b></div>
+              <div class="dim-examples">Feb 2026, Last winter, 2025, Recently</div>
+            </div>
+            <div class="help-dim-card where" onclick="setSearchText('Goa beach')">
+              <div class="dim-icon-pill"><span class="ms">landscape</span> <b>Where</b></div>
+              <div class="dim-examples">Goa beach, Manali mountains, Cafe, Home</div>
+            </div>
+          </div>
+
+          <div class="help-modal-cta-box">
+            <button class="help-cta-btn" onclick="closeSearchHelpModal(); navigate('#/search');">
+              <span class="ms">search</span> Try Keyword Search Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewer-root"></div>
+    </main>
+  </div>
   
   <script src="data.js"></script>
   <script src="search.js"></script>
