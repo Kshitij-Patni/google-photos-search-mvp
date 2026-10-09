@@ -357,7 +357,12 @@ function renderPerson() {
       </div>
     </div>
     
-    <div class="person-hero">
+    <div style="padding: 0 16px 4px; display:flex; justify-content:center;">
+      <div class="mvp-highlight-tag" onclick="showcaseFeature('personSearch')">
+        <span class="mvp-sparkle">✨</span> MVP CHANGE 6 vs Actual App: Scoped Person Search
+      </div>
+    </div>
+    <div class="person-hero" id="personHero">
       <img src="${person.face}" alt="${person.name}">
       <h2>${person.name}</h2>
       <div class="person-photo-count">${personPhotos.length} photos containing ${person.short}</div>
@@ -549,6 +554,11 @@ function renderSearch() {
           </div>
         </div>
         <button class="clear-person-filter-btn" onclick="clearPersonSearchFilter()">Search all photos</button>
+      </div>
+      <div style="padding: 2px 16px 2px;">
+        <div class="mvp-highlight-tag micro" onclick="showcaseFeature('personSearch')">
+          <span class="mvp-sparkle">✨</span> MVP CHANGE 6: Scoped Person Match
+        </div>
       </div>
     ` : ''}
     <div class="search-feature-tag-row">
@@ -850,6 +860,15 @@ function showcaseFeature(feat) {
         setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
       }
     }, 150);
+  } else if (feat === 'personSearch') {
+    searchInsidePerson('aarav', 'wedding');
+    setTimeout(() => {
+      const el = document.querySelector('.person-search-banner') || document.querySelector('.search-input-wrapper');
+      if (el) {
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
   } else if (feat === 'modal') {
     openSearchHelpModal();
   }
@@ -863,19 +882,6 @@ function togglePmShowcaseModal() {
 function closePmShowcaseModal() {
   const panel = document.getElementById('pmShowcasePanel');
   if (panel) panel.classList.remove('mobile-open');
-}
-
-function openBaselineModal() {
-  const el = document.getElementById('baselineModal');
-  if (el) el.classList.add('open');
-}
-
-function closeBaselineModal(e) {
-  if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('baseline-close-btn')) {
-    return;
-  }
-  const el = document.getElementById('baselineModal');
-  if (el) el.classList.remove('open');
 }
 
 

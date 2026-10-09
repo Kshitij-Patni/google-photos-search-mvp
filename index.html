@@ -10,13 +10,13 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
-  <link rel="stylesheet" href="styles.css?v=2.3">
+  <link rel="stylesheet" href="styles.css?v=2.4">
 </head>
 <body class="body-highlight-mode">
   <!-- Mobile quick trigger button -->
   <button class="mobile-highlights-fab" id="mobileHighlightsBtn" onclick="togglePmShowcaseModal()" title="View New Features">
     <span class="ms" style="font-size:18px;">auto_awesome</span>
-    <span>MVP Highlights (6)</span>
+    <span>MVP Highlights (7)</span>
   </button>
 
   <div class="app-container">
@@ -109,7 +109,7 @@
             </div>
             
             <div class="mvp-highlight-tag" onclick="showcaseFeature('modal')" style="margin-bottom: 10px;">
-              <span class="mvp-sparkle">✨</span> MVP CHANGE 6 vs Actual App: Onboarding 4-Clue Recall Guide
+              <span class="mvp-sparkle">✨</span> MVP CHANGE 7 vs Actual App: Onboarding 4-Clue Recall Guide
             </div>
 
             <h2 class="help-modal-title">Search using natural recall clues</h2>
@@ -156,12 +156,6 @@
         </div>
         <h1 class="pm-panel-title">Changes Made in this MVP</h1>
         <p class="pm-panel-desc">Highlighting all product changes & new features added in this prototype compared to the baseline Google Photos app (from user research & screenshots).</p>
-
-        <!-- Baseline Compare Action Button -->
-        <button class="pm-baseline-modal-btn" onclick="openBaselineModal()">
-          <span class="ms" style="font-size: 16px;">compare</span>
-          <span>View Actual App Screenshots vs MVP</span>
-        </button>
 
         <!-- Master Toggle -->
         <div class="pm-toggle-bar">
@@ -248,9 +242,23 @@
         </div>
 
         <!-- Change 6 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('personSearch')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge teal">CHANGE 6 &bull; PEOPLE & COLLECTIONS</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">👥 Scoped Keyword Search in People</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> People albums only display static photo collections or unguided global search where queries return other people.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Scoped keyword search directly inside any person's photos with contextual face avatar pill, dedicated status banner, strict candidate pool (guarantees NO other faces appear), and 1-tap filter chips (All, Only [Name], Occasions, Places).</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Impact:</b> Lets users instantly pinpoint specific memories with a loved one without other faces mixing in.</div>
+        </div>
+
+        <!-- Change 7 -->
         <div class="pm-feature-card" onclick="showcaseFeature('modal')">
           <div class="pm-card-top">
-            <span class="pm-card-badge pink">CHANGE 6 &bull; ONBOARDING</span>
+            <span class="pm-card-badge pink">CHANGE 7 &bull; ONBOARDING</span>
             <span class="pm-jump-btn">Inspect in App &rarr;</span>
           </div>
           <div class="pm-card-title">📖 Interactive 4-Clue Recall Modal Sheet</div>
@@ -262,89 +270,10 @@
         </div>
       </div>
     </aside>
-
-    <!-- Baseline Comparison Modal (Screenshots from actual Google Photos vs MVP) -->
-    <div class="baseline-modal-overlay" id="baselineModal" onclick="closeBaselineModal(event)">
-      <div class="baseline-modal-container" onclick="event.stopPropagation()">
-        <div class="baseline-modal-header">
-          <div>
-            <div class="pm-school-badge" style="margin-bottom: 4px;">BASELINE BENCHMARK</div>
-            <h2 class="baseline-modal-title">Actual Google Photos App vs. MVP Enhancements</h2>
-          </div>
-          <button class="baseline-close-btn" onclick="closeBaselineModal()">&times;</button>
-        </div>
-        
-        <p class="baseline-modal-desc">
-          Screenshots extracted directly from the baseline project benchmark (Kshitij Patni's Google Photos account in <code>MVP.pdf</code>), showing exactly what existed before and how this MVP improves it:
-        </p>
-
-        <div class="baseline-grid">
-          <!-- Screen 1 Comparison -->
-          <div class="baseline-card">
-            <div class="baseline-card-header">
-              <span class="baseline-screen-num">Screen 1 &bull; Photos Feed</span>
-              <span class="baseline-tag old">Actual Google Photos</span>
-            </div>
-            <div class="baseline-img-wrapper">
-              <img src="assets/baseline/page_1.jpg" alt="Actual Google Photos Home Feed">
-            </div>
-            <div class="baseline-notes">
-              <p><b>Baseline state:</b> Standard photo feed with Backup pill, top cluster, memories carousel ("At the beach").</p>
-              <p class="mvp-diff-text"><b>MVP Change:</b> We introduced the <b>AI Keyword Discovery Hero Card</b> right below the top bar and added the <b>pulsing Search FAB + Coachmark</b>.</p>
-            </div>
-          </div>
-
-          <!-- Screen 2 Comparison -->
-          <div class="baseline-card">
-            <div class="baseline-card-header">
-              <span class="baseline-screen-num">Screen 2 &bull; Search Screen</span>
-              <span class="baseline-tag old">Actual Google Photos</span>
-            </div>
-            <div class="baseline-img-wrapper">
-              <img src="assets/baseline/page_2.jpg" alt="Actual Google Photos Search">
-            </div>
-            <div class="baseline-notes">
-              <p><b>Baseline state:</b> Simple search bar "Search or ask" with basic recent history ("Romantic", "Goa"). No clue coaching.</p>
-              <p class="mvp-diff-text"><b>MVP Change:</b> Replaced with <b>4-Dimension Cognitive Recall Engine</b>, <b>Live Findability Coaching & Meter</b>, and <b>Smart Refinement Chips</b>.</p>
-            </div>
-          </div>
-
-          <!-- Screen 3 Comparison -->
-          <div class="baseline-card">
-            <div class="baseline-card-header">
-              <span class="baseline-screen-num">Screen 3 &bull; Collections</span>
-              <span class="baseline-tag old">Actual Google Photos</span>
-            </div>
-            <div class="baseline-img-wrapper">
-              <img src="assets/baseline/page_3.jpg" alt="Actual Google Photos Collections">
-            </div>
-            <div class="baseline-notes">
-              <p><b>Baseline state:</b> Albums, On this device, People, Wardrobe grid.</p>
-              <p class="mvp-diff-text"><b>MVP Change:</b> Retained realistic UI structure while interconnecting Collections directly with keyword search filters.</p>
-            </div>
-          </div>
-
-          <!-- Screen 4 & 5 Comparison -->
-          <div class="baseline-card">
-            <div class="baseline-card-header">
-              <span class="baseline-screen-num">Screen 4 & 5 &bull; People & Detail</span>
-              <span class="baseline-tag old">Actual Google Photos</span>
-            </div>
-            <div class="baseline-img-wrapper">
-              <img src="assets/baseline/page_5.jpg" alt="Actual Google Photos Person Detail">
-            </div>
-            <div class="baseline-notes">
-              <p><b>Baseline state:</b> Person profile with filter chips ("Only them", "Wedding", "Swimming").</p>
-              <p class="mvp-diff-text"><b>MVP Change:</b> Interlinked with our 4-dimension cognitive parser so searching within a person context seamlessly filters their memories.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
   
-  <script src="data.js?v=2.3"></script>
-  <script src="search.js?v=2.3"></script>
-  <script src="app.js?v=2.3"></script>
+  <script src="data.js?v=2.4"></script>
+  <script src="search.js?v=2.4"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>
