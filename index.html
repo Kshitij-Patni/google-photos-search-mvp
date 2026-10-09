@@ -10,9 +10,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
-  <link rel="stylesheet" href="styles.css?v=2.4">
+  <link rel="stylesheet" href="styles.css?v=2.5">
 </head>
-<body class="body-highlight-mode">
+<body>
   <!-- Mobile quick trigger button -->
   <button class="mobile-highlights-fab" id="mobileHighlightsBtn" onclick="togglePmShowcaseModal()" title="View New Features">
     <span class="ms" style="font-size:18px;">auto_awesome</span>
@@ -151,7 +151,6 @@
       <div class="pm-panel-header">
         <div class="pm-mobile-close" onclick="closePmShowcaseModal()">&times; Close</div>
         <div class="pm-badge-row">
-          <span class="pm-school-badge">🎓 NEXTLEAP PRODMAN</span>
           <span class="pm-status-pill">MVP vs ACTUAL APP</span>
         </div>
         <h1 class="pm-panel-title">Changes Made in this MVP</h1>
@@ -164,7 +163,7 @@
             <span class="pm-toggle-sub">Glow badges & spotlight markers in app</span>
           </div>
           <label class="pm-switch">
-            <input type="checkbox" id="featureHighlightToggle" checked onchange="toggleHighlightMode(this.checked)">
+            <input type="checkbox" id="featureHighlightToggle" onchange="toggleHighlightMode(this.checked)">
             <span class="pm-slider"></span>
           </label>
         </div>
@@ -272,8 +271,8 @@
     </aside>
   </div>
   
-  <script src="data.js?v=2.4"></script>
-  <script src="search.js?v=2.4"></script>
-  <script src="app.js?v=2.4"></script>
+  <script src="data.js?v=2.5"></script>
+  <script src="search.js?v=2.5"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
