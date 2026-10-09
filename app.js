@@ -5,6 +5,8 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
+const escapeHtml = (str) => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+
 let state = {
   route: 'photos',
   searchQuery: '',
@@ -16,17 +18,43 @@ let state = {
 function handleRouting() {
   const hash = window.location.hash || '#/photos';
   const parts = hash.split('/');
-  state.route = parts[1] || 'photos';
+  const primaryRoute = parts[1] || 'photos';
   
-  if (state.route === 'person') {
-    state.searchPersonContext = parts[2];
+  if (primaryRoute === 'person') {
+    if (parts[3] === 'search') {
+      state.route = 'search';
+      state.searchPersonContext = parts[2];
+    } else {
+      state.route = 'person';
+      state.searchPersonContext = parts[2];
+    }
+  } else if (primaryRoute === 'search') {
+    state.route = 'search';
+    if (parts[2] === 'person' && parts[3]) {
+      state.searchPersonContext = parts[3];
+    } else {
+      state.searchPersonContext = null;
+    }
   } else {
+    state.route = primaryRoute;
     state.searchPersonContext = null;
   }
 
   if (state.route === 'photos') state.opens++;
 
   renderRoute();
+}
+
+function searchInsidePerson(personId, query = '') {
+  state.searchPersonContext = personId;
+  state.searchQuery = query;
+  navigate('#/person/' + personId + '/search');
+}
+
+function clearPersonSearchFilter() {
+  state.searchPersonContext = null;
+  state.searchQuery = '';
+  navigate('#/search');
 }
 
 function navigate(hash) {
@@ -140,6 +168,11 @@ function renderPhotos() {
     </div>
 
     <!-- Creative AI Keyword Discovery Hero Card -->
+    <div style="padding: 0 16px 4px;">
+      <div class="mvp-highlight-tag" onclick="showcaseFeature('hero')">
+        <span class="mvp-sparkle">✨</span> MVP CHANGE 1 vs Actual App: AI Keyword Discovery Hero
+      </div>
+    </div>
     <div class="ai-discovery-card" id="aiDiscoveryCard">
       <div class="discovery-header">
         <div class="discovery-badge">
@@ -312,24 +345,48 @@ function renderPerson() {
   const person = PEOPLE.find(p => p.id === state.searchPersonContext);
   if (!person) { navigate('#/people'); return ''; }
 
-  const personPhotos = PHOTOS.filter(p => p.people.includes(person.id));
+  const personPhotos = PHOTOS.filter(p => p.people && p.people.includes(person.id));
+  const uniqueEvents = [...new Set(personPhotos.map(p => p.event).filter(Boolean))];
+  const uniquePlaces = [...new Set(personPhotos.flatMap(p => p.where).filter(w => PLACE_LABEL[w] || ['beach', 'mountains', 'home', 'cafe'].includes(w)))];
 
   return `
     <div class="top-bar">
       <div class="logo-area">
         <button onclick="navigate('#/people')"><span class="ms">arrow_back</span></button>
+        <span style="margin-left: 10px; font-size: 18px; font-weight: 500;">${person.name}</span>
       </div>
     </div>
     
     <div class="person-hero">
-      <img src="${person.face}">
+      <img src="${person.face}" alt="${person.name}">
       <h2>${person.name}</h2>
-      <button class="inside-search-btn" onclick="navigate('#/search')">
+      <div class="person-photo-count">${personPhotos.length} photos containing ${person.short}</div>
+      <button class="inside-search-btn" onclick="searchInsidePerson('${person.id}')">
         <span class="ms">search</span> Search inside ${person.short}'s photos
       </button>
     </div>
 
-    <div class="grid" style="padding-top: 16px;">
+    <!-- Quick Filter Chips under Person (Exact baseline feature from actual Google Photos) -->
+    <div class="person-filter-chips-scroll">
+      <button class="person-chip-pill active" onclick="searchInsidePerson('${person.id}', '')">
+        <span class="ms" style="font-size:16px;">photo_library</span> All (${personPhotos.length})
+      </button>
+      <button class="person-chip-pill" onclick="searchInsidePerson('${person.id}', 'only')">
+        <span class="ms" style="font-size:16px;">person</span> Only ${person.short}
+      </button>
+      ${uniqueEvents.map(e => `
+        <button class="person-chip-pill" onclick="searchInsidePerson('${person.id}', '${EVENTS[e].label.toLowerCase()}')">
+          <span class="ms" style="font-size:16px;">${EVENTS[e].icon || 'celebration'}</span> ${EVENTS[e].label}
+        </button>
+      `).join('')}
+      ${uniquePlaces.map(pl => `
+        <button class="person-chip-pill" onclick="searchInsidePerson('${person.id}', '${pl}')">
+          <span class="ms" style="font-size:16px;">landscape</span> ${PLACE_LABEL[pl] || cap(pl)}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="grid" style="padding-top: 8px;">
       ${personPhotos.map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
     </div>
   `;
@@ -337,20 +394,41 @@ function renderPerson() {
 
 function getSearchBodyHtml() {
   const isPerson = state.searchPersonContext;
+  const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
   let q = state.searchQuery.trim();
-  if (isPerson) {
-    const person = PEOPLE.find(p => p.id === isPerson);
-    if (person) q = appendClue(q, person.short);
+
+  // Check for "only" / "solo" query in person context:
+  const isOnlyPerson = isPerson && (/\bonly\b|\bsolo\b/i.test(q));
+  let cleanQueryForParse = q;
+  if (isOnlyPerson) {
+    cleanQueryForParse = q.replace(/\bonly\b|\bsolo\b/gi, '').trim();
   }
 
-  const parsed = parseQuery(q);
-  const pool = isPerson ? PHOTOS.filter(p => p.people.includes(isPerson)) : PHOTOS;
+  const parsed = parseQuery(cleanQueryForParse);
+
+  // STRICT POOL: When in person context, pool is STRICTLY photos containing that person
+  let pool = isPerson ? PHOTOS.filter(p => p.people && p.people.includes(isPerson)) : PHOTOS;
+
+  if (isOnlyPerson) {
+    pool = pool.filter(p => p.people && p.people.length === 1 && p.people.includes(isPerson));
+  }
+
   const res = runSearch(parsed, pool);
+
+  // GUARANTEE: When searching under a person's face, never show any photo without that person
+  if (isPerson) {
+    res.results = res.results.filter(p => p.people && p.people.includes(isPerson));
+  }
   
   const strength = searchStrength(parsed);
-  const hint = searchHint(parsed);
+  const hint = isPerson && !q ? 
+    { icon: 'person', tone: 'info', html: `Searching only photos of <b>${person.short}</b>. Type an occasion (e.g. “wedding”), place (“beach”), or year.` } : 
+    searchHint(parsed);
   const chips = clueChips(parsed);
   const displayChips = chips.filter(c => !(isPerson && c.dim === 'who' && c.value === isPerson));
+  if (isOnlyPerson && person) {
+    displayChips.unshift({ dim: 'who', value: 'only', label: `Only ${person.short}` });
+  }
 
   let bodyHtml = '';
 
@@ -392,6 +470,11 @@ function getSearchBodyHtml() {
     `;
   } else {
     bodyHtml = `
+      <div style="padding: 0 16px 4px;">
+        <div class="mvp-highlight-tag" onclick="showcaseFeature('coaching')">
+          <span class="mvp-sparkle">✨</span> MVP CHANGE 4 vs Actual App: Live Coaching & Findability Meter
+        </div>
+      </div>
       <div class="coaching-box">
         <div class="coaching-header">
           <span>Findability: ${strength.label}</span>
@@ -413,8 +496,13 @@ function getSearchBodyHtml() {
       ` : ''}
       
       ${res.results.length > 0 ? `
+        <div style="padding: 0 16px 4px;">
+          <div class="mvp-highlight-tag" onclick="showcaseFeature('chips')">
+            <span class="mvp-sparkle">✨</span> MVP CHANGE 5 vs Actual App: Context Refinement Chips
+          </div>
+        </div>
         <div class="refinements-scroll">
-          ${refinements(res.results, parsed, { exclude: isPerson }).map(r => `
+          ${refinements(res.results, parsed, { exclude: isPerson, skipWho: !!isPerson }).map(r => `
             <button class="refine-btn" data-add="${r.text}">
               ${r.face ? `<img src="${r.face}">` : ''} + ${r.label}
             </button>
@@ -423,7 +511,11 @@ function getSearchBodyHtml() {
       ` : ''}
       
       ${res.lowConfidence ? `<div style="padding: 0 16px 12px; color: #d7aefb; font-size: 13.5px;">Showing results based on clothing. Accuracy may be lower.</div>` : ''}
-      ${res.results.length === 0 ? `<div style="padding: 32px; text-align: center; color: var(--on-surface-variant);">No photos found. Try a person, place, or rough year.</div>` : ''}
+      ${res.results.length === 0 ? `
+        <div style="padding: 32px 20px; text-align: center; color: var(--on-surface-variant);">
+          ${isPerson ? `No photos of <b>${person.name}</b> found matching “${escapeHtml(state.searchQuery)}”. Try an occasion (wedding, diwali) or place (goa, pune).` : `No photos found. Try a person, place, or rough year.`}
+        </div>
+      ` : ''}
       
       <div class="grid">
         ${res.results.map(p => `<div class="tile" onclick="openViewer('${p.id}')"><img src="${p.src}"></div>`).join('')}
@@ -436,14 +528,32 @@ function getSearchBodyHtml() {
 function renderSearch() {
   const isPerson = state.searchPersonContext;
   const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
-  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos by who, what, when, where...';
+  const placeholder = person ? `Search inside ${person.short}'s photos...` : 'Search your photos by who, what, when, where...';
 
   return `
     <div class="top-bar search-mode">
       <button onclick="navigate('${isPerson ? '#/person/'+isPerson : '#/photos'}')"><span class="ms">arrow_back</span></button>
       <div class="search-input-wrapper">
+        ${person ? `<img src="${person.face}" class="search-person-avatar-pill" alt="${person.short}" title="Searching ${person.name}">` : ''}
         <input type="text" id="search-input" value="${state.searchQuery || ''}" placeholder="${placeholder}" autocomplete="off">
         <button id="clear-search" style="visibility: ${state.searchQuery ? 'visible' : 'hidden'};"><span class="ms" style="font-size: 20px;">close</span></button>
+      </div>
+    </div>
+    ${person ? `
+      <div class="person-search-banner">
+        <div class="person-search-banner-content">
+          <img src="${person.face}" alt="${person.name}">
+          <div class="person-search-banner-text">
+            <b>${person.name}</b>
+            <span>Searching only photos containing ${person.short}</span>
+          </div>
+        </div>
+        <button class="clear-person-filter-btn" onclick="clearPersonSearchFilter()">Search all photos</button>
+      </div>
+    ` : ''}
+    <div class="search-feature-tag-row">
+      <div class="mvp-highlight-tag" onclick="showcaseFeature('engine')">
+        <span class="mvp-sparkle">✨</span> MVP CHANGE 3 vs Actual App: 4-Dimension Recall Engine
       </div>
     </div>
     <div id="search-body">
@@ -466,9 +576,14 @@ function setSearchText(text) {
     if (clearBtn) clearBtn.style.visibility = text ? 'visible' : 'hidden';
     updateSearchBodyOnly();
   } else {
-    navigate('#/search');
+    if (state.searchPersonContext) {
+      navigate('#/person/' + state.searchPersonContext + '/search');
+    } else {
+      navigate('#/search');
+    }
   }
 }
+
 
 let searchDebounceTimer = null;
 
@@ -539,7 +654,12 @@ function updateSearchBodyOnly() {
 function attachSearchBodyEvents() {
   $$('.filter-chip').forEach(el => el.addEventListener('click', (e) => {
     const [dim, val] = e.currentTarget.dataset.remove.split(':');
-    let sq = removeClue(state.searchQuery, dim, val);
+    let sq;
+    if (val === 'only') {
+      sq = state.searchQuery.replace(/\bonly\b|\bsolo\b/gi, '').trim();
+    } else {
+      sq = removeClue(state.searchQuery, dim, val);
+    }
     state.searchQuery = sq;
     const input = $('#search-input');
     if (input) {
@@ -663,3 +783,99 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
+
+// --- PM MVP Showcase & Feature Spotlight Logic ---
+
+function toggleHighlightMode(active) {
+  if (active) {
+    document.body.classList.add('body-highlight-mode');
+  } else {
+    document.body.classList.remove('body-highlight-mode');
+  }
+}
+
+function showcaseFeature(feat) {
+  // Ensure highlight mode is active
+  const toggle = document.getElementById('featureHighlightToggle');
+  if (toggle) toggle.checked = true;
+  document.body.classList.add('body-highlight-mode');
+
+  closePmShowcaseModal();
+
+  if (feat === 'hero') {
+    navigate('#/photos');
+    setTimeout(() => {
+      const el = document.getElementById('aiDiscoveryCard');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
+  } else if (feat === 'fab') {
+    navigate('#/photos');
+    setTimeout(() => {
+      const el = document.getElementById('fab-search');
+      const coach = document.getElementById('searchCoachmark');
+      if (coach) coach.style.display = 'flex';
+      if (el) {
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
+  } else if (feat === 'engine') {
+    setSearchText('Ananya wedding Feb 2026');
+    setTimeout(() => {
+      const el = document.querySelector('.search-input-wrapper');
+      if (el) {
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
+  } else if (feat === 'coaching') {
+    setSearchText('blue tshirt');
+    setTimeout(() => {
+      const el = document.querySelector('.coaching-box');
+      if (el) {
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
+  } else if (feat === 'chips') {
+    setSearchText('wedding');
+    setTimeout(() => {
+      const el = document.querySelector('.refinements-scroll');
+      if (el) {
+        el.classList.add('pulse-spotlight-active');
+        setTimeout(() => el.classList.remove('pulse-spotlight-active'), 2500);
+      }
+    }, 150);
+  } else if (feat === 'modal') {
+    openSearchHelpModal();
+  }
+}
+
+function togglePmShowcaseModal() {
+  const panel = document.getElementById('pmShowcasePanel');
+  if (panel) panel.classList.toggle('mobile-open');
+}
+
+function closePmShowcaseModal() {
+  const panel = document.getElementById('pmShowcasePanel');
+  if (panel) panel.classList.remove('mobile-open');
+}
+
+function openBaselineModal() {
+  const el = document.getElementById('baselineModal');
+  if (el) el.classList.add('open');
+}
+
+function closeBaselineModal(e) {
+  if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('baseline-close-btn')) {
+    return;
+  }
+  const el = document.getElementById('baselineModal');
+  if (el) el.classList.remove('open');
+}
+
+

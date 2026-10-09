@@ -10,129 +10,341 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
-  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="stylesheet" href="styles.css?v=2.3">
 </head>
-<body>
-  <div class="device-wrapper">
-    <main class="device">
-      <!-- Android Status Bar -->
-      <div class="status-bar">
-        <div class="status-left">
-          <span class="status-time">6:29</span>
-          <div class="status-icons-mini">
-            <span class="ms" style="font-size:14px;">photo</span>
-            <span class="ms" style="font-size:14px;">chat</span>
-          </div>
-        </div>
-        <div class="status-right">
-          <span>5G</span>
-          <span style="font-size: 10px; opacity: 0.8;">R</span>
-          <span class="ms" style="font-size:15px;">wifi</span>
-          <span class="ms" style="font-size:15px;">signal_cellular_4_bar</span>
-          <div class="battery-pill">77</div>
-        </div>
-      </div>
+<body class="body-highlight-mode">
+  <!-- Mobile quick trigger button -->
+  <button class="mobile-highlights-fab" id="mobileHighlightsBtn" onclick="togglePmShowcaseModal()" title="View New Features">
+    <span class="ms" style="font-size:18px;">auto_awesome</span>
+    <span>MVP Highlights (6)</span>
+  </button>
 
-      <div class="screen" id="app-root">
-         <!-- App UI injected here -->
-      </div>
-      
-      <!-- Redesigned Floating Navigation Area: Pill Bar + Separated Circular Search FAB -->
-      <div class="floating-nav-container" id="bottomNavContainer">
-        <!-- Floating Coachmark Tooltip pointing to Search Button -->
-        <div class="search-coachmark-tooltip" id="searchCoachmark">
-          <div class="coachmark-content" onclick="navigate('#/search')">
-            <span class="ms coachmark-sparkle">auto_awesome</span>
-            <div class="coachmark-text">
-              <strong>Keyword Search</strong>
-              <span>Tap to search by what you remember</span>
+  <div class="app-container">
+    <div class="device-wrapper">
+      <main class="device">
+        <!-- Android Status Bar -->
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-time">6:29</span>
+            <div class="status-icons-mini">
+              <span class="ms" style="font-size:14px;">photo</span>
+              <span class="ms" style="font-size:14px;">chat</span>
             </div>
           </div>
-          <button class="coachmark-close-btn" onclick="dismissCoachmark(event)" title="Dismiss">
-            <span class="ms" style="font-size:16px;">close</span>
-          </button>
-          <div class="coachmark-pointer-arrow"></div>
+          <div class="status-right">
+            <span>5G</span>
+            <span style="font-size: 10px; opacity: 0.8;">R</span>
+            <span class="ms" style="font-size:15px;">wifi</span>
+            <span class="ms" style="font-size:15px;">signal_cellular_4_bar</span>
+            <div class="battery-pill">77</div>
+          </div>
         </div>
 
-        <nav class="floating-nav-pill">
-          <button class="nav-pill-item active" id="nav-photos" onclick="navigate('#/photos')">
-            <span class="ms active-icon">photo</span>
-            <span>Photos</span>
-          </button>
-          <button class="nav-pill-item" id="nav-collections" onclick="navigate('#/collections')">
-            <span>Collections</span>
-          </button>
-          <button class="nav-pill-item" id="nav-create" onclick="navigate('#/create')">
-            <span>Create</span>
-          </button>
-        </nav>
+        <div class="screen" id="app-root">
+           <!-- App UI injected here -->
+        </div>
         
-        <button class="standalone-search-fab has-pulse" id="fab-search" onclick="navigate('#/search')" title="Search">
-          <span class="ms">search</span>
-          <div class="fab-pulse-halo"></div>
-        </button>
-      </div>
-
-      <!-- Android Bottom 3-Button Navigation Bar -->
-      <div class="android-nav-bar">
-        <div class="android-btn" title="Recents" onclick="alert('Recent Apps')">
-          <div class="recents-icon"><span></span><span></span><span></span></div>
-        </div>
-        <div class="android-btn" title="Home" onclick="navigate('#/photos')">
-          <div class="home-icon"></div>
-        </div>
-        <div class="android-btn" title="Back" onclick="history.back()">
-          <span class="ms" style="font-size:18px;">arrow_back_ios</span>
-        </div>
-      </div>
-      
-      <!-- How Keyword Search Works Modal -->
-      <div class="help-modal-overlay" id="searchHelpModal" onclick="closeSearchHelpModal(event)">
-        <div class="help-modal-sheet" onclick="event.stopPropagation()">
-          <div class="help-modal-handle"></div>
-          <div class="help-modal-header">
-            <div class="help-modal-badge">
-              <span class="ms" style="font-size:18px; color:#A8C7FA;">auto_awesome</span>
-              <span>HOW KEYWORD SEARCH WORKS</span>
+        <!-- Redesigned Floating Navigation Area: Pill Bar + Separated Circular Search FAB -->
+        <div class="floating-nav-container" id="bottomNavContainer">
+          <!-- Floating Coachmark Tooltip pointing to Search Button -->
+          <div class="search-coachmark-tooltip" id="searchCoachmark">
+            <div class="coachmark-content" onclick="navigate('#/search')">
+              <span class="ms coachmark-sparkle">auto_awesome</span>
+              <div class="coachmark-text">
+                <div class="mvp-highlight-tag micro" onclick="event.stopPropagation(); showcaseFeature('fab');">
+                  <span class="mvp-sparkle">✨</span> MVP CHANGE 2 vs Actual App
+                </div>
+                <strong>Keyword Search</strong>
+                <span>Tap to search by what you remember</span>
+              </div>
             </div>
-            <button class="help-close-btn" onclick="closeSearchHelpModal()"><span class="ms">close</span></button>
-          </div>
-          <h2 class="help-modal-title">Search using natural recall clues</h2>
-          <p class="help-modal-desc">Instead of browsing thousands of pictures, describe any combination of memory clues:</p>
-          
-          <div class="help-dims-grid">
-            <div class="help-dim-card who" onclick="setSearchText('Aarav and Mom')">
-              <div class="dim-icon-pill"><span class="ms">person</span> <b>Who</b></div>
-              <div class="dim-examples">Aarav, Ananya, Mom, Dad, Rohan, Priya</div>
-            </div>
-            <div class="help-dim-card what" onclick="setSearchText('Wedding')">
-              <div class="dim-icon-pill"><span class="ms">celebration</span> <b>What</b></div>
-              <div class="dim-examples">Wedding, Diwali, Birthday, Trek, Convocation</div>
-            </div>
-            <div class="help-dim-card when" onclick="setSearchText('Last winter')">
-              <div class="dim-icon-pill"><span class="ms">calendar_month</span> <b>When</b></div>
-              <div class="dim-examples">Feb 2026, Last winter, 2025, Recently</div>
-            </div>
-            <div class="help-dim-card where" onclick="setSearchText('Goa beach')">
-              <div class="dim-icon-pill"><span class="ms">landscape</span> <b>Where</b></div>
-              <div class="dim-examples">Goa beach, Manali mountains, Cafe, Home</div>
-            </div>
-          </div>
-
-          <div class="help-modal-cta-box">
-            <button class="help-cta-btn" onclick="closeSearchHelpModal(); navigate('#/search');">
-              <span class="ms">search</span> Try Keyword Search Now
+            <button class="coachmark-close-btn" onclick="dismissCoachmark(event)" title="Dismiss">
+              <span class="ms" style="font-size:16px;">close</span>
             </button>
+            <div class="coachmark-pointer-arrow"></div>
           </div>
+
+          <nav class="floating-nav-pill">
+            <button class="nav-pill-item active" id="nav-photos" onclick="navigate('#/photos')">
+              <span class="ms active-icon">photo</span>
+              <span>Photos</span>
+            </button>
+            <button class="nav-pill-item" id="nav-collections" onclick="navigate('#/collections')">
+              <span>Collections</span>
+            </button>
+            <button class="nav-pill-item" id="nav-create" onclick="navigate('#/create')">
+              <span>Create</span>
+            </button>
+          </nav>
+          
+          <button class="standalone-search-fab has-pulse" id="fab-search" onclick="navigate('#/search')" title="Search">
+            <span class="ms">search</span>
+            <div class="fab-pulse-halo"></div>
+          </button>
+        </div>
+
+        <!-- Android Bottom 3-Button Navigation Bar -->
+        <div class="android-nav-bar">
+          <div class="android-btn" title="Recents" onclick="alert('Recent Apps')">
+            <div class="recents-icon"><span></span><span></span><span></span></div>
+          </div>
+          <div class="android-btn" title="Home" onclick="navigate('#/photos')">
+            <div class="home-icon"></div>
+          </div>
+          <div class="android-btn" title="Back" onclick="history.back()">
+            <span class="ms" style="font-size:18px;">arrow_back_ios</span>
+          </div>
+        </div>
+        
+        <!-- How Keyword Search Works Modal -->
+        <div class="help-modal-overlay" id="searchHelpModal" onclick="closeSearchHelpModal(event)">
+          <div class="help-modal-sheet" onclick="event.stopPropagation()">
+            <div class="help-modal-handle"></div>
+            <div class="help-modal-header">
+              <div class="help-modal-badge">
+                <span class="ms" style="font-size:18px; color:#A8C7FA;">auto_awesome</span>
+                <span>HOW KEYWORD SEARCH WORKS</span>
+              </div>
+              <button class="help-close-btn" onclick="closeSearchHelpModal()"><span class="ms">close</span></button>
+            </div>
+            
+            <div class="mvp-highlight-tag" onclick="showcaseFeature('modal')" style="margin-bottom: 10px;">
+              <span class="mvp-sparkle">✨</span> MVP CHANGE 6 vs Actual App: Onboarding 4-Clue Recall Guide
+            </div>
+
+            <h2 class="help-modal-title">Search using natural recall clues</h2>
+            <p class="help-modal-desc">Instead of browsing thousands of pictures, describe any combination of memory clues:</p>
+            
+            <div class="help-dims-grid">
+              <div class="help-dim-card who" onclick="setSearchText('Aarav and Mom')">
+                <div class="dim-icon-pill"><span class="ms">person</span> <b>Who</b></div>
+                <div class="dim-examples">Aarav, Ananya, Mom, Dad, Rohan, Priya</div>
+              </div>
+              <div class="help-dim-card what" onclick="setSearchText('Wedding')">
+                <div class="dim-icon-pill"><span class="ms">celebration</span> <b>What</b></div>
+                <div class="dim-examples">Wedding, Diwali, Birthday, Trek, Convocation</div>
+              </div>
+              <div class="help-dim-card when" onclick="setSearchText('Last winter')">
+                <div class="dim-icon-pill"><span class="ms">calendar_month</span> <b>When</b></div>
+                <div class="dim-examples">Feb 2026, Last winter, 2025, Recently</div>
+              </div>
+              <div class="help-dim-card where" onclick="setSearchText('Goa beach')">
+                <div class="dim-icon-pill"><span class="ms">landscape</span> <b>Where</b></div>
+                <div class="dim-examples">Goa beach, Manali mountains, Cafe, Home</div>
+              </div>
+            </div>
+
+            <div class="help-modal-cta-box">
+              <button class="help-cta-btn" onclick="closeSearchHelpModal(); navigate('#/search');">
+                <span class="ms">search</span> Try Keyword Search Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="viewer-root"></div>
+      </main>
+    </div>
+
+    <!-- NextLeap ProdMan MVP Feature Showcase Companion Panel -->
+    <aside class="pm-showcase-panel" id="pmShowcasePanel">
+      <div class="pm-panel-header">
+        <div class="pm-mobile-close" onclick="closePmShowcaseModal()">&times; Close</div>
+        <div class="pm-badge-row">
+          <span class="pm-school-badge">🎓 NEXTLEAP PRODMAN</span>
+          <span class="pm-status-pill">MVP vs ACTUAL APP</span>
+        </div>
+        <h1 class="pm-panel-title">Changes Made in this MVP</h1>
+        <p class="pm-panel-desc">Highlighting all product changes & new features added in this prototype compared to the baseline Google Photos app (from user research & screenshots).</p>
+
+        <!-- Baseline Compare Action Button -->
+        <button class="pm-baseline-modal-btn" onclick="openBaselineModal()">
+          <span class="ms" style="font-size: 16px;">compare</span>
+          <span>View Actual App Screenshots vs MVP</span>
+        </button>
+
+        <!-- Master Toggle -->
+        <div class="pm-toggle-bar">
+          <div class="pm-toggle-info">
+            <span class="pm-toggle-label">✨ Highlight MVP Changes</span>
+            <span class="pm-toggle-sub">Glow badges & spotlight markers in app</span>
+          </div>
+          <label class="pm-switch">
+            <input type="checkbox" id="featureHighlightToggle" checked onchange="toggleHighlightMode(this.checked)">
+            <span class="pm-slider"></span>
+          </label>
         </div>
       </div>
 
-      <div id="viewer-root"></div>
-    </main>
+      <div class="pm-feature-list">
+        <!-- Change 1 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('hero')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge blue">CHANGE 1 &bull; PHOTOS FEED</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">✨ AI Keyword Discovery Hero Card</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> Opens directly to photo feed & memories. Zero proactive discoverability on how to search naturally.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Prominent hero card with live animated ticker cycling sample memory queries with color-coded tags + 1-tap example pills.</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Impact:</b> Solves 0-to-1 adoption by teaching natural memory recall before users get stuck.</div>
+        </div>
+
+        <!-- Change 2 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('fab')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge cyan">CHANGE 2 &bull; NAVIGATION</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">🎯 Standalone Search FAB & Coachmark Tooltip</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> Search is buried in bottom nav tab or plain icon without affordance or guidance.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Elevated circular FAB with pulsing halo + contextual floating coachmark tooltip pointing to Search.</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Impact:</b> Forms instant search habit for retrieval as primary user journey.</div>
+        </div>
+
+        <!-- Change 3 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('engine')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge green">CHANGE 3 &bull; SEARCH CORE</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">🧠 4-Dimension Natural Recall Engine</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> Strict metadata/date matching or unguided freeform Gemini "Ask" box.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Natural cognitive parser mapping queries into Who (faces), What (occasions), When (timeline/season), Where (places).</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Research Stat:</b> Users recall Who/What/Where 100% of the time, but exact dates 0% of the time.</div>
+        </div>
+
+        <!-- Change 4 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('coaching')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge yellow">CHANGE 4 &bull; LIVE FEEDBACK</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">📊 Live Coaching Hint & Findability Meter</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> Completely absent. If search yields 0 results, user gets no guidance why.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Dynamic strength meter (Weak &rarr; Excellent) + actionable coaching prompts as you type.</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Research Stat:</b> Adding a rough timeline increases search success by <b>2.7&times;</b>.</div>
+        </div>
+
+        <!-- Change 5 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('chips')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge purple">CHANGE 5 &bull; RESULTS VIEW</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">🏷️ Contextual 1-Tap Refinement & Clue Chips</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> Generic static filters (Documents, Screenshots) rather than query-specific narrowing.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Active clues shown as removable chips + dynamic refinement pills (+Ananya, +Wedding, +2026) mined from results.</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Impact:</b> Narrows down large candidate photo sets to the target memory in 1 tap.</div>
+        </div>
+
+        <!-- Change 6 -->
+        <div class="pm-feature-card" onclick="showcaseFeature('modal')">
+          <div class="pm-card-top">
+            <span class="pm-card-badge pink">CHANGE 6 &bull; ONBOARDING</span>
+            <span class="pm-jump-btn">Inspect in App &rarr;</span>
+          </div>
+          <div class="pm-card-title">📖 Interactive 4-Clue Recall Modal Sheet</div>
+          <div class="pm-diff-box">
+            <div class="pm-diff-row old"><span class="diff-icon">✕</span> <b>Actual Google Photos:</b> No onboarding for natural memory search.</div>
+            <div class="pm-diff-row new"><span class="diff-icon">✓</span> <b>Added in MVP:</b> Educational sheet breaking down Who/What/When/Where with clickable one-touch demo queries.</div>
+          </div>
+          <div class="pm-card-metric">📈 <b>Impact:</b> Eliminates blank canvas anxiety for first-time searchers.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Baseline Comparison Modal (Screenshots from actual Google Photos vs MVP) -->
+    <div class="baseline-modal-overlay" id="baselineModal" onclick="closeBaselineModal(event)">
+      <div class="baseline-modal-container" onclick="event.stopPropagation()">
+        <div class="baseline-modal-header">
+          <div>
+            <div class="pm-school-badge" style="margin-bottom: 4px;">BASELINE BENCHMARK</div>
+            <h2 class="baseline-modal-title">Actual Google Photos App vs. MVP Enhancements</h2>
+          </div>
+          <button class="baseline-close-btn" onclick="closeBaselineModal()">&times;</button>
+        </div>
+        
+        <p class="baseline-modal-desc">
+          Screenshots extracted directly from the baseline project benchmark (Kshitij Patni's Google Photos account in <code>MVP.pdf</code>), showing exactly what existed before and how this MVP improves it:
+        </p>
+
+        <div class="baseline-grid">
+          <!-- Screen 1 Comparison -->
+          <div class="baseline-card">
+            <div class="baseline-card-header">
+              <span class="baseline-screen-num">Screen 1 &bull; Photos Feed</span>
+              <span class="baseline-tag old">Actual Google Photos</span>
+            </div>
+            <div class="baseline-img-wrapper">
+              <img src="assets/baseline/page_1.jpg" alt="Actual Google Photos Home Feed">
+            </div>
+            <div class="baseline-notes">
+              <p><b>Baseline state:</b> Standard photo feed with Backup pill, top cluster, memories carousel ("At the beach").</p>
+              <p class="mvp-diff-text"><b>MVP Change:</b> We introduced the <b>AI Keyword Discovery Hero Card</b> right below the top bar and added the <b>pulsing Search FAB + Coachmark</b>.</p>
+            </div>
+          </div>
+
+          <!-- Screen 2 Comparison -->
+          <div class="baseline-card">
+            <div class="baseline-card-header">
+              <span class="baseline-screen-num">Screen 2 &bull; Search Screen</span>
+              <span class="baseline-tag old">Actual Google Photos</span>
+            </div>
+            <div class="baseline-img-wrapper">
+              <img src="assets/baseline/page_2.jpg" alt="Actual Google Photos Search">
+            </div>
+            <div class="baseline-notes">
+              <p><b>Baseline state:</b> Simple search bar "Search or ask" with basic recent history ("Romantic", "Goa"). No clue coaching.</p>
+              <p class="mvp-diff-text"><b>MVP Change:</b> Replaced with <b>4-Dimension Cognitive Recall Engine</b>, <b>Live Findability Coaching & Meter</b>, and <b>Smart Refinement Chips</b>.</p>
+            </div>
+          </div>
+
+          <!-- Screen 3 Comparison -->
+          <div class="baseline-card">
+            <div class="baseline-card-header">
+              <span class="baseline-screen-num">Screen 3 &bull; Collections</span>
+              <span class="baseline-tag old">Actual Google Photos</span>
+            </div>
+            <div class="baseline-img-wrapper">
+              <img src="assets/baseline/page_3.jpg" alt="Actual Google Photos Collections">
+            </div>
+            <div class="baseline-notes">
+              <p><b>Baseline state:</b> Albums, On this device, People, Wardrobe grid.</p>
+              <p class="mvp-diff-text"><b>MVP Change:</b> Retained realistic UI structure while interconnecting Collections directly with keyword search filters.</p>
+            </div>
+          </div>
+
+          <!-- Screen 4 & 5 Comparison -->
+          <div class="baseline-card">
+            <div class="baseline-card-header">
+              <span class="baseline-screen-num">Screen 4 & 5 &bull; People & Detail</span>
+              <span class="baseline-tag old">Actual Google Photos</span>
+            </div>
+            <div class="baseline-img-wrapper">
+              <img src="assets/baseline/page_5.jpg" alt="Actual Google Photos Person Detail">
+            </div>
+            <div class="baseline-notes">
+              <p><b>Baseline state:</b> Person profile with filter chips ("Only them", "Wedding", "Swimming").</p>
+              <p class="mvp-diff-text"><b>MVP Change:</b> Interlinked with our 4-dimension cognitive parser so searching within a person context seamlessly filters their memories.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
-  <script src="data.js?v=2.2"></script>
-  <script src="search.js?v=2.2"></script>
-  <script src="app.js?v=2.2"></script>
+  <script src="data.js?v=2.3"></script>
+  <script src="search.js?v=2.3"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>
