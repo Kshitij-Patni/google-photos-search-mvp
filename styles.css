@@ -953,3 +953,25 @@ button {
   transition: background 0.15s;
 }
 .help-cta-btn:hover { background: #1b66ca; }
+
+/* Search Route Layout Fixes */
+.screen.search-active {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar.search-mode {
+  position: relative !important;
+  flex-shrink: 0;
+}
+
+#search-body {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  scrollbar-width: none;
+}
+#search-body::-webkit-scrollbar {
+  display: none;
+}

@@ -32,6 +32,15 @@ function handleRouting() {
 function navigate(hash) {
   if (!hash) hash = '#/photos';
   if (window.location.hash === hash) {
+    if (state.route === 'search') {
+      const input = $('#search-input');
+      if (input) {
+        input.focus();
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+        return;
+      }
+    }
     handleRouting();
   } else {
     window.location.hash = hash;
@@ -39,8 +48,6 @@ function navigate(hash) {
 }
 
 window.addEventListener('hashchange', handleRouting);
-window.addEventListener('DOMContentLoaded', handleRouting);
-window.addEventListener('load', handleRouting);
 
 function renderRoute() {
   if (!state.route) {
@@ -68,6 +75,12 @@ function renderRoute() {
 
   const root = $('#app-root');
   if (!root) return;
+
+  if (state.route === 'search') {
+    root.classList.add('search-active');
+  } else {
+    root.classList.remove('search-active');
+  }
 
   try {
     if (state.route === 'photos') root.innerHTML = renderPhotos();
@@ -322,13 +335,13 @@ function renderPerson() {
   `;
 }
 
-function renderSearch() {
+function getSearchBodyHtml() {
   const isPerson = state.searchPersonContext;
-  const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
-  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos by who, what, when, where...';
-
   let q = state.searchQuery.trim();
-  if (isPerson) q = appendClue(q, person.short);
+  if (isPerson) {
+    const person = PEOPLE.find(p => p.id === isPerson);
+    if (person) q = appendClue(q, person.short);
+  }
 
   const parsed = parseQuery(q);
   const pool = isPerson ? PHOTOS.filter(p => p.people.includes(isPerson)) : PHOTOS;
@@ -417,55 +430,141 @@ function renderSearch() {
       </div>
     `;
   }
+  return bodyHtml;
+}
+
+function renderSearch() {
+  const isPerson = state.searchPersonContext;
+  const person = isPerson ? PEOPLE.find(p => p.id === isPerson) : null;
+  const placeholder = isPerson ? `Search ${person.short}'s photos...` : 'Search your photos by who, what, when, where...';
 
   return `
     <div class="top-bar search-mode">
       <button onclick="navigate('${isPerson ? '#/person/'+isPerson : '#/photos'}')"><span class="ms">arrow_back</span></button>
       <div class="search-input-wrapper">
-        <input type="text" id="search-input" value="${state.searchQuery}" placeholder="${placeholder}" autocomplete="off" autofocus>
-        ${state.searchQuery ? `<button id="clear-search"><span class="ms" style="font-size: 20px;">close</span></button>` : ''}
+        <input type="text" id="search-input" value="${state.searchQuery || ''}" placeholder="${placeholder}" autocomplete="off">
+        <button id="clear-search" style="visibility: ${state.searchQuery ? 'visible' : 'hidden'};"><span class="ms" style="font-size: 20px;">close</span></button>
       </div>
     </div>
     <div id="search-body">
-      ${bodyHtml}
+      ${getSearchBodyHtml()}
     </div>
   `;
 }
 
 function setSearchText(text) {
   state.searchQuery = text;
-  navigate('#/search');
+  if (state.route === 'search') {
+    const input = $('#search-input');
+    if (input) {
+      input.value = text;
+      input.focus();
+      const len = text.length;
+      input.setSelectionRange(len, len);
+    }
+    const clearBtn = $('#clear-search');
+    if (clearBtn) clearBtn.style.visibility = text ? 'visible' : 'hidden';
+    updateSearchBodyOnly();
+  } else {
+    navigate('#/search');
+  }
 }
+
+let searchDebounceTimer = null;
 
 function attachSearchEvents() {
   const input = $('#search-input');
   if (!input) return;
-  
-  setTimeout(() => input.focus(), 80);
+
+  // Focus safely and place cursor at end if text exists
+  input.focus();
+  const len = input.value.length;
+  input.setSelectionRange(len, len);
+
+  let isComposing = false;
+  input.addEventListener('compositionstart', () => { isComposing = true; });
+  input.addEventListener('compositionend', (e) => {
+    isComposing = false;
+    state.searchQuery = e.target.value;
+    clearTimeout(searchDebounceTimer);
+    updateSearchBodyOnly();
+  });
 
   input.addEventListener('input', (e) => {
+    if (isComposing) return;
     state.searchQuery = e.target.value;
-    renderRoute();
+
+    const clearBtn = $('#clear-search');
+    if (clearBtn) {
+      clearBtn.style.visibility = state.searchQuery ? 'visible' : 'hidden';
+    }
+
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      updateSearchBodyOnly();
+    }, 180);
   });
-  
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(searchDebounceTimer);
+      updateSearchBodyOnly();
+      input.blur();
+    }
+  });
+
   const clearBtn = $('#clear-search');
   if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-          state.searchQuery = '';
-          renderRoute();
-      });
+    clearBtn.addEventListener('click', () => {
+      state.searchQuery = '';
+      input.value = '';
+      clearBtn.style.visibility = 'hidden';
+      input.focus();
+      updateSearchBodyOnly();
+    });
   }
 
+  attachSearchBodyEvents();
+}
+
+function updateSearchBodyOnly() {
+  const searchBody = $('#search-body');
+  if (searchBody) {
+    searchBody.innerHTML = getSearchBodyHtml();
+    attachSearchBodyEvents();
+  }
+}
+
+function attachSearchBodyEvents() {
   $$('.filter-chip').forEach(el => el.addEventListener('click', (e) => {
     const [dim, val] = e.currentTarget.dataset.remove.split(':');
     let sq = removeClue(state.searchQuery, dim, val);
     state.searchQuery = sq;
-    renderRoute();
+    const input = $('#search-input');
+    if (input) {
+      input.value = sq;
+      input.focus();
+      const len = sq.length;
+      input.setSelectionRange(len, len);
+    }
+    const clearBtn = $('#clear-search');
+    if (clearBtn) clearBtn.style.visibility = sq ? 'visible' : 'hidden';
+    updateSearchBodyOnly();
   }));
 
   $$('.refine-btn').forEach(el => el.addEventListener('click', (e) => {
     state.searchQuery = appendClue(state.searchQuery, e.currentTarget.dataset.add);
-    renderRoute();
+    const input = $('#search-input');
+    if (input) {
+      input.value = state.searchQuery;
+      input.focus();
+      const len = state.searchQuery.length;
+      input.setSelectionRange(len, len);
+    }
+    const clearBtn = $('#clear-search');
+    if (clearBtn) clearBtn.style.visibility = state.searchQuery ? 'visible' : 'hidden';
+    updateSearchBodyOnly();
   }));
 }
 
@@ -551,5 +650,16 @@ function openViewer(id) {
   `;
 }
 
-// Execute routing immediately on script evaluation
-handleRouting();
+// Safe single initialization
+let appInitialized = false;
+function initApp() {
+  if (appInitialized) return;
+  appInitialized = true;
+  handleRouting();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
